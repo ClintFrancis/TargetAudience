@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using TargetAudience.Common.Enums;
@@ -12,6 +13,11 @@ namespace TargetAudience.Functions.Utils
 		public static double Size(this FaceRectangle rect)
 		{
 			return rect.Width * rect.Height;
+		}
+
+		public static Rectangle ToRectangle(this FaceRectangle rect)
+		{
+			return new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height);
 		}
 
 		public static double Average(this FacialHair facialHair)

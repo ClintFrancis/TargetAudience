@@ -17,16 +17,17 @@ namespace TargetAudience.Common.Models
 		[JsonProperty("averageAge")]
 		public double AverageAge { get; set; }
 
-		[JsonProperty("male")]
-		public MemberGroup Male { get; set; }
+		[JsonProperty("males")]
+		public MemberGroup Males { get; set; }
 
-		[JsonProperty("female")]
-		public MemberGroup Female { get; set; }
+		[JsonProperty("females")]
+		public MemberGroup Females { get; set; }
 
 		public List<Member> GetAllIndividuals()
 		{
-			var allIndividuals = new List<Member>(Male.Individuals);
-			allIndividuals.AddRange(Female.Individuals);
+			var allIndividuals = new List<Member>();
+			if (Males != null) allIndividuals.AddRange(Males.Individuals);
+			if (Females != null) allIndividuals.AddRange(Females.Individuals);
 			return allIndividuals;
 		}
 	}

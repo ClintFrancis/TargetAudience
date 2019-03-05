@@ -7,15 +7,95 @@
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.24" />
     <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.Face" Version="2.3.0-preview" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
+    <PackageReference Include="CoreCompat.System.Drawing" Version="1.0.0-beta006" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="host.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="local.settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </None>
+    <None Include="**/*" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="bin\Debug\netcoreapp2.0\CaptureAudience\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\IdentifyAudience\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\AudienceHistory\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\SocialTrendsByLocation\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\CaptureAudience\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\IdentifyAudience\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\AudienceHistory\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\SocialTrendsByLocation\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\CaptureAudience\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\IdentifyAudience\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\AudienceHistory\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\SocialTrendsByLocation\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\CaptureAudience\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\IdentifyAudience\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\AudienceHistory\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\SocialTrendsByLocation\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\CaptureAudience\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\IdentifyAudience\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\AudienceHistory\function.json" />
+    <None Remove="bin\Debug\netcoreapp2.0\SocialTrendsByLocation\function.json" />
+    <None Remove="Models\AudienceHistoryRequest.cs" />
+    <None Remove="Models\AudienceRequest.cs" />
+    <None Remove="TargetAudience.cs" />
+    <None Remove="Utils\ErrorTrackingHelper.cs" />
+    <None Remove="Utils\FaceExtensions.cs" />
+    <None Remove="Services\AudienceMemoryStorage.cs" />
+    <None Remove="Services\FaceListManager.cs" />
+    <None Remove="Services\FaceService.cs" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\TargetAudience.Functions.deps.json" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\AudienceHistory\function.json" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\IdentifyAudience\function.json" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Authentication.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Authentication.Core.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Authorization.Policy.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Authorization.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Hosting.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Hosting.Server.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Http.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Http.Extensions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Http.Features.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Http.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.JsonPatch.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Mvc.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Mvc.Core.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Mvc.Formatters.Json.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Mvc.WebApiCompatShim.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.ResponseCaching.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Routing.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.Routing.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.AspNetCore.WebUtilities.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Azure.CognitiveServices.Vision.Face.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Azure.WebJobs.Extensions.Http.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Azure.WebJobs.Extensions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Azure.WebJobs.Host.Storage.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Azure.WebJobs.Host.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Azure.WebJobs.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Build.Framework.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Build.Utilities.Core.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.DotNet.PlatformAbstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Configuration.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Configuration.Binder.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Configuration.EnvironmentVariables.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Configuration.FileExtensions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Configuration.Json.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Configuration.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.DependencyInjection.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.DependencyModel.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.FileProviders.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.FileProviders.Physical.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.FileSystemGlobbing.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Hosting.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Hosting.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Logging.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Logging.Configuration.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Logging.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.ObjectPool.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Options.ConfigurationExtensions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Options.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\TargetAudience.Functions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\TargetAudience.Functions.pdb" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\extensions.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TargetAudience.Common\TargetAudience.Common.csproj" />

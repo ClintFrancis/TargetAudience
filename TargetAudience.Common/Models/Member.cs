@@ -15,6 +15,9 @@ namespace TargetAudience.Common.Models
 		[JsonProperty("faceId")]
 		public string FaceId { get; set; }
 
+		[JsonProperty("persistedFaceId")]
+		public string PersistedFaceId { get; set; }
+
 		[JsonProperty("smile")]
 		public double Smile { get; set; } = 0;
 

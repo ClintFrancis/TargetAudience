@@ -29,14 +29,14 @@ namespace TargetAudience.Common.Utils
 		{
 			var averageEmotion = new EmotionValues();
 
-			averageEmotion.Anger = collection.Select(x => x.Anger).Average();
-			averageEmotion.Contempt = collection.Select(x => x.Contempt).Average();
-			averageEmotion.Disgust = collection.Select(x => x.Disgust).Average();
-			averageEmotion.Fear = collection.Select(x => x.Fear).Average();
-			averageEmotion.Happiness = collection.Select(x => x.Happiness).Average();
-			averageEmotion.Neutral = collection.Select(x => x.Neutral).Average();
-			averageEmotion.Sadness = collection.Select(x => x.Sadness).Average();
-			averageEmotion.Surprise = collection.Select(x => x.Surprise).Average();
+			averageEmotion.Anger = collection.Average(x => x.Anger);
+			averageEmotion.Contempt = collection.Average(x => x.Contempt);
+			averageEmotion.Disgust = collection.Average(x => x.Disgust);
+			averageEmotion.Fear = collection.Average(x => x.Fear);
+			averageEmotion.Happiness = collection.Average(x => x.Happiness);
+			averageEmotion.Neutral = collection.Average(x => x.Neutral);
+			averageEmotion.Sadness = collection.Average(x => x.Sadness);
+			averageEmotion.Surprise = collection.Average(x => x.Surprise);
 
 			return averageEmotion;
 		}

@@ -44,16 +44,22 @@ namespace TargetAudience.Functions.Utils
 
 			var result = new Audience();
 
-			result.Male = CreateGroup(GenderType.Male, members);
-			result.Female = CreateGroup(GenderType.Female, members);
-			result.Total = result.Male.Total + result.Female.Total;
+			result.Males = CreateGroup(GenderType.Male, members);
+			result.Females = CreateGroup(GenderType.Female, members);
 
-			var averageAge = (result.Male.AverageAge + result.Female.AverageAge);
-			if (result.Male.Total > 0 && result.Female.Total > 0)
+			double averageMaleAge = result.Males?.AverageAge ?? 0;
+			int totalMales = result.Males?.Total ?? 0;
+
+			var averageFemaleAge = result.Females?.AverageAge ?? 0;
+			int totalFemales = result.Females?.Total ?? 0;
+
+			var averageAge = (averageMaleAge + averageFemaleAge);
+			if (totalMales > 0 && totalFemales > 0)
 				averageAge *= .5;
 
+			result.Total = totalMales + totalFemales;
 			result.AverageAge = Math.Round(averageAge);
-			result.AverageGender = (result.Male.Total > result.Female.Total) ? GenderType.Male : GenderType.Female;
+			result.AverageGender = (totalMales > totalFemales) ? GenderType.Male : GenderType.Female;
 
 			return result;
 		}
@@ -61,11 +67,10 @@ namespace TargetAudience.Functions.Utils
 		public static MemberGroup CreateGroup(GenderType gender, IEnumerable<Member> members)
 		{
 			var groupMembers = members.Where(x => x.Gender == gender);
+			if (groupMembers.Count() == 0)
+				return null;
 
 			var result = new MemberGroup(gender);
-			if (groupMembers.Count() == 0)
-				return result;
-
 			result.Individuals = groupMembers.ToArray();
 
 			// Parse Averages

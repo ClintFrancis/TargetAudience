@@ -19,9 +19,46 @@ namespace TargetAudience.Functions
 {
 	public static class TargetedAds
 	{
-		static IStorageService storage = new MemoryStorage();
-		static FaceService faceService = new FaceService();
+		static IAudienceStorageService storage = new AudienceMemoryStorage();
+		//static FaceService faceService = new FaceService();
 		const string DefaultLocationId = "default";
+
+		[FunctionName("CaptureAudience")]
+		public static async Task<IActionResult> CaptureAudience([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequest req, ILogger log)
+		{
+			string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+			var data = JsonConvert.DeserializeObject<AudienceRequest>(requestBody);
+
+			try
+			{
+				// Decode data from Base64
+				byte[] imageBytes = Convert.FromBase64String(data.Image);
+
+				// Process the image
+				using (Stream stream = new MemoryStream(imageBytes))
+				{
+					var members = await FaceService.CaptureMembers(stream, DateTime.Now);
+
+					if (members.Count > 0)
+					{
+						// Storage the results
+						var token = new System.Threading.CancellationToken();
+						var location = !string.IsNullOrEmpty(data.Location) ? data.Location : DefaultLocationId;
+						await storage.WriteAsync(location, members, token);
+
+						var audience = MemberUtils.CreateAudience(members);
+
+						return new OkObjectResult(audience);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				return new BadRequestObjectResult("An error occured: " + ex.Message);
+			}
+
+			return new BadRequestObjectResult("Unable to detect faces.");
+		}
 
 		[FunctionName("IdentifyAudience")]
 		public static async Task<IActionResult> IdentifyAudience([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequest req, ILogger log)
@@ -37,7 +74,7 @@ namespace TargetAudience.Functions
 				// Process the image
 				using (Stream stream = new MemoryStream(imageBytes))
 				{
-					var members = await faceService.DetectMembers(stream, DateTime.Now);
+					var members = await FaceService.DetectMembers(stream, DateTime.Now);
 
 					if (members.Count > 0)
 					{
@@ -82,6 +119,25 @@ namespace TargetAudience.Functions
 				var response = MemberUtils.CreateAudience(allMembers);
 
 				return new OkObjectResult(response);
+			}
+			catch (Exception ex)
+			{
+				return new BadRequestObjectResult("An error occured: " + ex.Message);
+			}
+		}
+
+		[FunctionName("SocialTrendsByLocation")]
+		public static async Task<IActionResult> SocialTrendsByLocation([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequest req, ILogger log)
+		{
+			string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+			var data = JsonConvert.DeserializeObject<AudienceHistoryRequest>(requestBody);
+
+			try
+			{
+				//...
+				// https://www.toptal.com/api-developers/social-network-apis
+
+				return new OkObjectResult("OK");
 			}
 			catch (Exception ex)
 			{
