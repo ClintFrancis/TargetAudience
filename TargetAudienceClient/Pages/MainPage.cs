@@ -27,26 +27,26 @@ namespace TargetAudienceClient.Pages
 				Children.Add(captureNavigationPage);
 			}
 
-			//var orderNavigationPage = new NavigationPage(new OrdersPage());
-			//orderNavigationPage.Title = "Orders";
-			//orderNavigationPage.Icon = "orders.png";
-			//orderNavigationPage.BarTextColor = textColor;
-			//orderNavigationPage.BarBackgroundColor = backgroundColor;
-			//Children.Add(orderNavigationPage);
+			var monitorNavigationPage = new NavigationPage(new MonitorPage());
+			monitorNavigationPage.Title = "Monitor";
+			//monitorNavigationPage.Icon = "capture.png";
+			monitorNavigationPage.BarTextColor = textColor;
+			monitorNavigationPage.BarBackgroundColor = backgroundColor;
+			Children.Add(monitorNavigationPage);
 
-			//var identifyNavigationPage = new NavigationPage(new IdentifyCustomersPage());
-			//identifyNavigationPage.Title = "Identify";
-			//identifyNavigationPage.Icon = "capture.png";
-			//identifyNavigationPage.BarTextColor = textColor;
-			//identifyNavigationPage.BarBackgroundColor = backgroundColor;
-			//Children.Add(identifyNavigationPage);
+			var historyNavigationPage = new NavigationPage(new HistoryPage());
+			historyNavigationPage.Title = "History";
+			//historyNavigationPage.Icon = "orders.png";
+			historyNavigationPage.BarTextColor = textColor;
+			historyNavigationPage.BarBackgroundColor = backgroundColor;
+			Children.Add(historyNavigationPage);
 
-			//var settingsNavigationPage = new NavigationPage(new SettingsPage());
-			//settingsNavigationPage.Title = "Settings";
+			var settingsNavigationPage = new NavigationPage(new SettingsPage());
+			settingsNavigationPage.Title = "Settings";
 			//settingsNavigationPage.Icon = "settings.png";
-			//settingsNavigationPage.BarTextColor = textColor;
-			//settingsNavigationPage.BarBackgroundColor = backgroundColor;
-			//Children.Add(settingsNavigationPage);
+			settingsNavigationPage.BarTextColor = textColor;
+			settingsNavigationPage.BarBackgroundColor = backgroundColor;
+			Children.Add(settingsNavigationPage);
 		}
 
 		protected override void OnCurrentPageChanged()

@@ -75,7 +75,7 @@ namespace TargetAudience.Functions.Utils
 
 			// Parse Averages
 			var emotions = groupMembers.Select(x => x.Emotion).AverageEmotions();
-			result.AverageEmotion = emotions.Parse().ToString();
+			result.AverageEmotion = emotions.PrimaryEmotion().ToString();
 			result.AverageAge = Math.Round(groupMembers.Select(x => (double)x.Age).Average(), 2);
 			result.AverageFacialHair = Math.Round(groupMembers.Select(x => x.FacialHair).Average(), 2);
 			result.AverageGlasses = Math.Round(groupMembers.Select(x => x.Glasses).Average(), 2);

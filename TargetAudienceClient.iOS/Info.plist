@@ -44,12 +44,16 @@
 	<string>This app needs access to the photo gallery.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-	<!--To support localhost -->
-	<key>NSAllowsLocalNetworking</key>
-	<true/>
-	<!--To continue to work for iOS 9 -->
-	<key>NSAllowsArbitraryLoads</key>
-	<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
 	</dict>
+	<key>Custom Property</key>
+	<string></string>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 </dict>
 </plist>

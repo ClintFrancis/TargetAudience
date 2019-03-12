@@ -8,7 +8,32 @@ namespace TargetAudience.Common.Utils
 {
 	public static class EmotionExtensions
 	{
-		public static EmotionType Parse(this EmotionValues emotion)
+		public static string ToEmoji(this EmotionType type)
+		{
+			switch (type)
+			{
+				case EmotionType.Anger:
+					return "\U0001F621";
+				case EmotionType.Contempt:
+					return "\U0001F612";
+				case EmotionType.Disgust:
+					return "\U0001F922";
+				case EmotionType.Fear:
+					return "\U0001F631";
+				case EmotionType.Happiness:
+					return "\U0001F600";
+				case EmotionType.Neutral:
+					return "\U0001F610";
+				case EmotionType.Sadness:
+					return "\U0001F622";
+				case EmotionType.Surprise:
+					return "\U0001F62F";
+				default:
+					return "";
+			}
+		}
+
+		public static EmotionType PrimaryEmotion(this EmotionValues emotion)
 		{
 			var emotions = new List<(EmotionType type, double value)>()
 			{

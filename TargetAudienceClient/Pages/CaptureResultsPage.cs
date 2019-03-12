@@ -1,6 +1,7 @@
 ﻿using System;
 using TargetAudienceClient.Converters;
 using TargetAudienceClient.Forms.Models;
+using TargetAudienceClient.Views;
 using Xamarin.Forms;
 
 namespace TargetAudienceClient.Pages
@@ -12,9 +13,8 @@ namespace TargetAudienceClient.Pages
 		public CaptureResultsPage()
 		{
 			BindingContext = captureResultsModel = new CaptureResultsViewModel(Navigation);
-			Title = "Capture";
+			Title = "Results";
 
-			// TODO image bitmap data
 			var image = new Image();
 			image.SetBinding(Image.SourceProperty, new Binding("ImageData", BindingMode.Default, converter: new ByteArrayToImageSourceConverter()));
 			image.Aspect = Aspect.AspectFit;
@@ -30,8 +30,33 @@ namespace TargetAudienceClient.Pages
 			var averageGender = new EntryCell { Label = "Average Gender", Placeholder = "", IsEnabled = false };
 			averageGender.SetBinding(EntryCell.TextProperty, new Binding("AverageGender", BindingMode.Default));
 
-			var anverageAge = new EntryCell { Label = "Average Age", Placeholder = "", IsEnabled = false };
-			anverageAge.SetBinding(EntryCell.TextProperty, new Binding("AverageAge", BindingMode.Default, stringFormat: "{0:F1}"));
+			var averageAge = new EntryCell { Label = "Average Age", Placeholder = "", IsEnabled = false };
+			averageAge.SetBinding(EntryCell.TextProperty, new Binding("AverageAge", BindingMode.Default, stringFormat: "{0:F1}"));
+
+			// Genders
+			var genderSection = new TableSection("Genders");
+
+			// Male Audience
+			var maleAudience = captureResultsModel.MaleAudience;
+			if (maleAudience != null)
+			{
+				var malesCell = new LinkViewCell("Males");
+				malesCell.Tapped += async (sender, e) =>
+					await Navigation.PushAsync(new MemberGroupDetailsPage(captureResultsModel.MaleAudience));
+
+				genderSection.Add(malesCell);
+			}
+
+			// Female Audience
+			var femaleAudience = captureResultsModel.FemaleAudience;
+			if (femaleAudience != null)
+			{
+				var femalesCell = new LinkViewCell("Females");
+				femalesCell.Tapped += async (sender, e) =>
+					await Navigation.PushAsync(new MemberGroupDetailsPage(captureResultsModel.FemaleAudience));
+
+				genderSection.Add(femalesCell);
+			}
 
 			Content = new TableView
 			{
@@ -44,9 +69,9 @@ namespace TargetAudienceClient.Pages
 						location,
 						audienceTotal,
 						averageGender,
-						anverageAge
-						//entryEmotion
-					}
+						averageAge
+					},
+					genderSection
 				},
 				Intent = TableIntent.Settings
 			};

@@ -1,5 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
+using TargetAudience.Common.Enums;
 
 namespace TargetAudience.Common.Models
 {
