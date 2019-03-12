@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using TargetAudience.Common.Interfaces;
+using TargetAudience.Common.Messages;
 using TargetAudience.Common.Models;
 using TargetAudience.Functions.Models;
 using TargetAudience.Functions.Services;
@@ -28,6 +30,7 @@ namespace TargetAudience.Functions
 		{
 			string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 			var data = JsonConvert.DeserializeObject<AudienceRequest>(requestBody);
+			var response = new AudienceResponse();
 
 			try
 			{
@@ -46,18 +49,23 @@ namespace TargetAudience.Functions
 						var location = !string.IsNullOrEmpty(data.Location) ? data.Location : DefaultLocationId;
 						await storage.WriteAsync(location, members, token);
 
-						var audience = MemberUtils.CreateAudience(members);
+						response.Audience = MemberUtils.CreateAudience(members);
+						response.StatusCode = (int)HttpStatusCode.OK;
 
-						return new OkObjectResult(audience);
+						return new OkObjectResult(response);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				return new BadRequestObjectResult("An error occured: " + ex.Message);
+				response.Message = ex.Message;
+				response.StatusCode = (int)HttpStatusCode.InternalServerError;
+				return new BadRequestObjectResult(response);
 			}
 
-			return new BadRequestObjectResult("Unable to detect faces.");
+			response.Message = "Unable to detect faces.";
+			response.StatusCode = (int)HttpStatusCode.BadRequest;
+			return new BadRequestObjectResult(response);
 		}
 
 		[FunctionName("IdentifyAudience")]
@@ -65,7 +73,7 @@ namespace TargetAudience.Functions
 		{
 			string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 			var data = JsonConvert.DeserializeObject<AudienceRequest>(requestBody);
-
+			var response = new AudienceResponse();
 			try
 			{
 				// Decode data from Base64
@@ -83,18 +91,23 @@ namespace TargetAudience.Functions
 						var location = !string.IsNullOrEmpty(data.Location) ? data.Location : DefaultLocationId;
 						await storage.WriteAsync(location, members, token);
 
-						var audience = MemberUtils.CreateAudience(members);
+						response.Audience = MemberUtils.CreateAudience(members);
+						response.StatusCode = (int)HttpStatusCode.OK;
 
-						return new OkObjectResult(audience);
+						return new OkObjectResult(response);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				return new BadRequestObjectResult("An error occured: " + ex.Message);
+				response.Message = ex.Message;
+				response.StatusCode = (int)HttpStatusCode.InternalServerError;
+				return new BadRequestObjectResult(response);
 			}
 
-			return new BadRequestObjectResult("Unable to detect faces.");
+			response.Message = "Unable to detect faces.";
+			response.StatusCode = (int)HttpStatusCode.BadRequest;
+			return new BadRequestObjectResult(response);
 		}
 
 		[FunctionName("AudienceHistory")]
@@ -102,6 +115,7 @@ namespace TargetAudience.Functions
 		{
 			string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 			var data = JsonConvert.DeserializeObject<AudienceHistoryRequest>(requestBody);
+			var response = new AudienceResponse();
 
 			try
 			{
@@ -116,13 +130,16 @@ namespace TargetAudience.Functions
 				foreach (var item in collection.Values)
 					allMembers.AddRange(item);
 
-				var response = MemberUtils.CreateAudience(allMembers);
+				response.Audience = MemberUtils.CreateAudience(allMembers);
+				response.StatusCode = (int)HttpStatusCode.OK;
 
 				return new OkObjectResult(response);
 			}
 			catch (Exception ex)
 			{
-				return new BadRequestObjectResult("An error occured: " + ex.Message);
+				response.Message = ex.Message;
+				response.StatusCode = (int)HttpStatusCode.InternalServerError;
+				return new BadRequestObjectResult(response);
 			}
 		}
 

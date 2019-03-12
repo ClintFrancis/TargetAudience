@@ -1,7 +1,8 @@
 ﻿using System;
 using Newtonsoft.Json;
+using TargetAudience.Common.Models;
 
-namespace TargetAudience.Functions.Models
+namespace TargetAudience.Common.Messages
 {
 	public class AudienceRequest
 	{
@@ -10,5 +11,11 @@ namespace TargetAudience.Functions.Models
 
 		[JsonProperty("image")]
 		public string Image { get; set; }
+	}
+
+	public class AudienceResponse : BaseResponse
+	{
+		[JsonProperty("audience")]
+		public Audience Audience { get; set; }
 	}
 }
