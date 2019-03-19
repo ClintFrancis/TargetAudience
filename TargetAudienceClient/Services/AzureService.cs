@@ -32,6 +32,29 @@ namespace TargetAudienceClient.Services
 			}
 		}
 
+		public static async Task<AudienceResponse> CaptureAudience(string location, byte[] image)
+		{
+			var post = new AudienceRequest();
+			post.Image = Convert.ToBase64String(image);
+			post.Location = location;
+
+			try
+			{
+				var json = JsonConvert.SerializeObject(post);
+				var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+				return await MakeRequest<AudienceResponse>(ProjectConfig.CaptureAudienceUrl, httpContent);
+			}
+			catch (Exception ex)
+			{
+				return new AudienceResponse()
+				{
+					Message = ex.Message,
+					ErrorCode = 1
+				};
+			}
+		}
+
 		/// <summary>
 		/// Makes the http requests.
 		/// </summary>

@@ -40,7 +40,7 @@ namespace TargetAudienceClient.Pages
 			var maleAudience = captureResultsModel.MaleAudience;
 			if (maleAudience != null)
 			{
-				var malesCell = new LinkViewCell("Males");
+				var malesCell = new LinkViewCell("Male Audience");
 				malesCell.Tapped += async (sender, e) =>
 					await Navigation.PushAsync(new MemberGroupDetailsPage(captureResultsModel.MaleAudience));
 
@@ -51,7 +51,7 @@ namespace TargetAudienceClient.Pages
 			var femaleAudience = captureResultsModel.FemaleAudience;
 			if (femaleAudience != null)
 			{
-				var femalesCell = new LinkViewCell("Females");
+				var femalesCell = new LinkViewCell("Female Audience");
 				femalesCell.Tapped += async (sender, e) =>
 					await Navigation.PushAsync(new MemberGroupDetailsPage(captureResultsModel.FemaleAudience));
 

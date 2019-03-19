@@ -23,13 +23,31 @@ namespace TargetAudienceClient
 			set { AppSettings.AddOrUpdateValue(cameraOption, (int)value); }
 		}
 
-		const string timerInterval = "timerInterval";
-		private static readonly int TimerIntervalDefault = 10;
+		const string monitorInvertal = "monitorInterval";
+		private static readonly int MonitorIntervalDefault = 5;
 
-		public static int TimerInterval
+		public static int MonitorInterval
 		{
-			get { return AppSettings.GetValueOrDefault(timerInterval, TimerIntervalDefault); }
-			set { AppSettings.AddOrUpdateValue(timerInterval, (int)value); }
+			get { return AppSettings.GetValueOrDefault(monitorInvertal, MonitorIntervalDefault); }
+			set { AppSettings.AddOrUpdateValue(monitorInvertal, (int)value); }
+		}
+
+		const string historyInterval = "historyInterval";
+		private static readonly int HistoryIntervalDefault = 5;
+
+		public static int HistoryInterval
+		{
+			get { return AppSettings.GetValueOrDefault(historyInterval, HistoryIntervalDefault); }
+			set { AppSettings.AddOrUpdateValue(historyInterval, (int)value); }
+		}
+
+		const string cameraLocation = "cameraLocation";
+		private static readonly string CameraLocationDefault = "None";
+
+		public static string CameraLocation
+		{
+			get { return AppSettings.GetValueOrDefault(cameraLocation, CameraLocationDefault); }
+			set { AppSettings.AddOrUpdateValue(cameraLocation, (string)value); }
 		}
 	}
 }

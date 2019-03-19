@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using MonkeyCache.FileStore;
 using TargetAudience.Common.Messages;
@@ -16,46 +17,18 @@ namespace TargetAudienceClient.ViewModels
 		public INavigation Navigation { get; set; }
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		string location;
-		public string Location
-		{
-			get { return location; }
-			set
-			{
-				if (location != value)
-				{
-					location = value;
-					OnPropertyChanged("Location");
-				}
-			}
-		}
-
 		byte[] imageData;
 		public byte[] ImageData
 		{
 			get { return imageData; }
-			protected set
-			{
-				if (imageData != value)
-				{
-					imageData = value;
-					OnPropertyChanged("ImageData");
-				}
-			}
+			protected set { SetProperty(ref imageData, value); }
 		}
 
 		bool isBusy;
 		public bool IsBusy
 		{
 			get { return isBusy; }
-			set
-			{
-				if (isBusy == value)
-					return;
-
-				isBusy = value;
-				OnPropertyChanged("IsBusy");
-			}
+			set { SetProperty(ref isBusy, value); }
 		}
 
 		public CaptureViewModel(INavigation navigation)
@@ -63,7 +36,6 @@ namespace TargetAudienceClient.ViewModels
 			this.Navigation = navigation;
 		}
 
-		// TODO consider removing this UIResponse return.
 		public async Task<UIResponse> Submit(byte[] bytes)
 		{
 			if (IsBusy)
@@ -71,6 +43,7 @@ namespace TargetAudienceClient.ViewModels
 
 			IsBusy = true;
 			ImageData = bytes;
+			var location = Settings.CameraLocation;
 
 			var result = new UIResponse();
 			AudienceResponse response = await AzureService.IdentifyAudience(location, imageData);
@@ -96,7 +69,17 @@ namespace TargetAudienceClient.ViewModels
 			await Navigation.PushAsync(new CaptureResultsPage());
 		}
 
-		protected void OnPropertyChanged(string propertyName)
+		bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+		{
+			if (Object.Equals(storage, value))
+				return false;
+
+			storage = value;
+			OnPropertyChanged(propertyName);
+			return true;
+		}
+
+		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}

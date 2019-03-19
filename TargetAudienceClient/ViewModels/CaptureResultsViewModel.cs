@@ -5,6 +5,8 @@ using TargetAudience.Common.Models;
 using TargetAudience.Common.Enums;
 using MonkeyCache.FileStore;
 using TargetAudienceClient.Constants;
+using System.Runtime.CompilerServices;
+using System;
 
 namespace TargetAudienceClient.Forms.Models
 {
@@ -18,112 +20,56 @@ namespace TargetAudienceClient.Forms.Models
 		public string Location
 		{
 			get { return location; }
-			set
-			{
-				if (location != value)
-				{
-					location = value;
-					OnPropertyChanged("Location");
-				}
-			}
+			protected set { SetProperty(ref location, value); }
 		}
 
 		double audienceTotal;
 		public double AudienceTotal
 		{
 			get { return audienceTotal; }
-			set
-			{
-				if (audienceTotal != value)
-				{
-					audienceTotal = value;
-					OnPropertyChanged("AudienceTotal");
-				}
-			}
+			protected set { SetProperty(ref audienceTotal, value); }
 		}
 
 		GenderType averageGender;
 		public GenderType AverageGender
 		{
 			get { return averageGender; }
-			protected set
-			{
-				if (averageGender != value)
-				{
-					averageGender = value;
-					OnPropertyChanged("AverageGender");
-				}
-			}
+			protected set { SetProperty(ref averageGender, value); }
 		}
 
 		double averageAge;
 		public double AverageAge
 		{
 			get { return averageAge; }
-			protected set
-			{
-				if (averageAge != value)
-				{
-					averageAge = value;
-					OnPropertyChanged("AverageAge");
-				}
-			}
+			protected set { SetProperty(ref averageAge, value); }
 		}
 
 		MemberGroup maleAudience;
 		public MemberGroup MaleAudience
 		{
 			get { return maleAudience; }
-			protected set
-			{
-				if (maleAudience != value)
-				{
-					maleAudience = value;
-					OnPropertyChanged("MaleAudience");
-				}
-			}
+			protected set { SetProperty(ref maleAudience, value); }
 		}
 
 		MemberGroup femaleAudience;
 		public MemberGroup FemaleAudience
 		{
 			get { return femaleAudience; }
-			protected set
-			{
-				if (femaleAudience != value)
-				{
-					femaleAudience = value;
-					OnPropertyChanged("FemaleAudience");
-				}
-			}
+			protected set { SetProperty(ref femaleAudience, value); }
 		}
 
 		byte[] imageData;
 		public byte[] ImageData
 		{
 			get { return imageData; }
-			protected set
-			{
-				if (imageData != value)
-				{
-					imageData = value;
-					OnPropertyChanged("ImageData");
-				}
-			}
+			protected set { SetProperty(ref imageData, value); }
 		}
 
 		bool isBusy;
 		public bool IsBusy
 		{
 			get { return isBusy; }
-			set
-			{
-				if (isBusy == value)
-					return;
-
-				isBusy = value;
-				OnPropertyChanged("IsBusy");
-			}
+			set { SetProperty(ref isBusy, value); }
 		}
 
 		public void Reset()
@@ -151,7 +97,17 @@ namespace TargetAudienceClient.Forms.Models
 			}
 		}
 
-		protected void OnPropertyChanged(string propertyName)
+		bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+		{
+			if (Object.Equals(storage, value))
+				return false;
+
+			storage = value;
+			OnPropertyChanged(propertyName);
+			return true;
+		}
+
+		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
