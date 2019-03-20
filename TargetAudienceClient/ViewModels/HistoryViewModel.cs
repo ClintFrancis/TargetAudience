@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microcharts;
 using SkiaSharp;
+using TargetAudienceClient.Constants;
 using Xamarin.Forms;
 
 namespace TargetAudienceClient.ViewModels
@@ -14,45 +15,94 @@ namespace TargetAudienceClient.ViewModels
 		public event PropertyChangedEventHandler PropertyChanged;
 		INavigation navigation;
 
-		public Chart DemoChart
-		{
-			get; private set;
-		}
+		// TODO
+		// Location multiselect
+		// Audience Gender
+		// Age Range
+		// Date Range
+		// EMotions
+		// unique individuals
+		// Facial hair (males)
+		// Makeup (females)
+		// Glasses
+
+
+		public Chart GenderChart { get; private set; }
+
+		public Chart AgeChart { get; private set; }
+
 
 		public HistoryViewModel(INavigation navigation)
 		{
 			this.navigation = navigation;
 
-			var entries = new List<ChartEntry>
+			GenderChart = new PieChart()
 			{
-				new ChartEntry(212)
-				 {
-					 Label = "UWP",
-					 ValueLabel = "212",
-					 Color = SKColor.Parse("#2c3e50")
-				 },
-				 new ChartEntry(248)
-				 {
-					 Label = "Android",
-					 ValueLabel = "248",
-					 Color = SKColor.Parse("#77d065")
-				 },
-				 new ChartEntry(128)
-				 {
-					 Label = "iOS",
-					 ValueLabel = "128",
-					 Color = SKColor.Parse("#b455b6")
-				 },
-				 new ChartEntry(500)
-				 {
-				 Color = SKColor.Parse("#3498db")
-				 }
+				HoleRadius = .7f,
+				LabelTextSize = 40,
+				Margin = 60
 			};
+			GenderChart.Entries = new ChartEntry[]
+				{
+					new ChartEntry(.7f)
+					{
+						 Label = "Male",
+						 ValueLabel = "7",
+						 Color = CustomColors.DarkBlue
+					},
+					new ChartEntry(.3f)
+					{
+						 Label = "Female",
+						 ValueLabel = "3",
+						 Color = CustomColors.LightBlue
+					},
+				};
 
-			DemoChart = new LineChart()
+			AgeChart = new LineChart()
 			{
-				Entries = entries
+				BackgroundColor = SKColor.Empty,
+				LineAreaAlpha = 0x0,
+				PointSize = 20,
+				LineMode = LineMode.Straight,
+				Entries = new ChartEntry[]
+				{
+					new ChartEntry(212)
+					{
+						 Label = "UWP",
+						 ValueLabel = "212",
+						 Color = CustomColors.DarkBlue
+					},
+					new ChartEntry(248)
+					{
+						 Label = "Android",
+						 ValueLabel = "248",
+						 Color = CustomColors.DarkBlue
+						 },
+					 new ChartEntry(128)
+					 {
+						 Label = "iOS",
+						 ValueLabel = "128",
+						 Color = CustomColors.DarkBlue
+					 },
+					 new ChartEntry(500)
+					 {
+					 Color = CustomColors.DarkBlue
+					 }}
 			};
+		}
+
+		Chart CreateChart()
+		{
+			var genderChart = new LineChart()
+			{
+				LabelTextSize = 24,
+				BackgroundColor = SKColor.Empty,
+				LineMode = LineMode.Straight,
+				PointMode = PointMode.Circle,
+				PointSize = 20,
+				LineAreaAlpha = 0x0
+			};
+			return genderChart;
 		}
 
 		bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)

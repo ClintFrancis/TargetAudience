@@ -13,8 +13,9 @@ namespace TargetAudience.Functions.Utils
 		public static Member ToMember(this DetectedFace value)
 		{
 			var attribs = value.FaceAttributes;
-			var member = new Member(value.FaceId.ToString())
+			var member = new Member
 			{
+				FaceId = value.FaceId.ToString(),
 				Gender = attribs.Gender.ToGenderType(),
 				Age = (double)attribs.Age,
 				Smile = (double)attribs.Smile,

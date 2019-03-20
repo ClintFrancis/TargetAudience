@@ -12,47 +12,24 @@ namespace TargetAudienceClient.Views
 	[Xamarin.Forms.ContentProperty("View")]
 	public class CustomViewCell : ViewCell
 	{
-		public View CustomView;
-
-		public CustomViewCell(View customView, int height)
+		public CustomViewCell(View customView)
 		{
-			Thickness padding;
-			switch (Device.RuntimePlatform)
-			{
-				case Device.iOS:
-				//padding = new Thickness(20, 15);
-				//break;
-				case Device.Android:
-				case Device.UWP:
-				default:
-					padding = new Thickness(0);
-					break;
-			}
-
-			CustomView = customView;
-
 			var layout = new StackLayout
 			{
 				Orientation = StackOrientation.Vertical,
 				VerticalOptions = LayoutOptions.FillAndExpand,
-				Padding = padding,
 				Children =
 				{
-					CustomView
+					customView
 				}
 			};
 
 			this.View = layout;
 		}
 
-		protected override void OnBindingContextChanged()
+		public CustomViewCell(Layout layout)
 		{
-			base.OnBindingContextChanged();
-		}
-
-		protected override void OnAppearing()
-		{
-			base.OnAppearing();
+			this.View = layout;
 		}
 	}
 }

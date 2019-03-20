@@ -36,9 +36,7 @@ namespace TargetAudience.Common.Models
 		[JsonProperty("timestamp")]
 		public DateTime Timestamp { get; set; }
 
-		public Member(string id)
-		{
-			FaceId = id;
-		}
+		[JsonProperty("location")]
+		public string Location { get; set; }
 	}
 }
