@@ -19,22 +19,14 @@ namespace TargetAudience.Common.Models
 		[JsonProperty("members")]
 		public Member[] Members { get; set; }
 
-
-		public static LocationWindow Create(string location, IEnumerable<Member> members)
+		public void AddMembers(IEnumerable<Member> members)
 		{
 			if (members.Count() < 1)
 				throw new ArgumentOutOfRangeException("'members' must contain at least one entry");
 
-			var result = new LocationWindow()
-			{
-				Location = location,
-				Members = members.OrderBy(x => x.Timestamp).ToArray()
-			};
-
-			result.StartDate = result.Members.FirstOrDefault().Timestamp;
-			result.EndDate = result.Members.LastOrDefault().Timestamp;
-
-			return result;
+			Members = members.OrderBy(x => x.Timestamp).ToArray();
+			StartDate = Members.FirstOrDefault().Timestamp;
+			EndDate = Members.LastOrDefault().Timestamp;
 		}
 	}
 }

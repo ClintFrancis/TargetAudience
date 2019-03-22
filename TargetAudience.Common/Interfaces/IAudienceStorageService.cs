@@ -8,12 +8,12 @@ namespace TargetAudience.Common.Interfaces
 {
 	public interface IAudienceStorageService
 	{
-		Task DeleteAsync(string[] locations, CancellationToken cancellationToken);
-		Task<IDictionary<string, List<Member>>> ReadAsync(string[] locations, CancellationToken cancellationToken);
-		Task WriteAsync(IDictionary<string, List<Member>> changes, CancellationToken cancellationToken);
-		Task WriteAsync(string location, List<Member> changes, CancellationToken cancellationToken);
-		Task<IDictionary<string, List<Member>>> QueryTimeSpan(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken);
-		Task<IDictionary<string, List<Member>>> QueryTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken);
+		Task<int> DeleteAsync(string[] locations, CancellationToken cancellationToken);
+		Task<List<Member>> ReadAsync(string[] locations, CancellationToken cancellationToken, int maxItemCount = -1);
+		Task<List<Member>> WriteAsync(List<Member> changes, CancellationToken cancellationToken);
+		Task<List<Member>> WriteAsync(string location, List<Member> changes, CancellationToken cancellationToken);
+		Task<List<Member>> QueryTimeSpan(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken);
+		Task<List<Member>> QueryTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken);
 		Task<List<LocationWindow>> QueryMemberLocations(string persistentMemberId, DateTime fromDate, DateTime toDate, TimeSpan minimumDuration, CancellationToken cancellationToken);
 	}
 }

@@ -21,7 +21,7 @@ namespace TargetAudience.Functions
 {
 	public static class TargetedAds
 	{
-		static IAudienceStorageService storage = new AudienceMemoryStorage();
+		static IAudienceStorageService storage = new AudienceCosmosStorage();
 		//static FaceService faceService = new FaceService();
 		const string DefaultLocationId = "default";
 
@@ -126,11 +126,7 @@ namespace TargetAudience.Functions
 
 				var collection = await storage.QueryTimeSpan(locations, pastTime, currentTime, token);
 
-				var allMembers = new List<Member>();
-				foreach (var item in collection.Values)
-					allMembers.AddRange(item);
-
-				response.Audience = MemberUtils.CreateAudience(allMembers);
+				response.Audience = MemberUtils.CreateAudience(collection);
 				response.StatusCode = (int)HttpStatusCode.OK;
 
 				return new OkObjectResult(response);

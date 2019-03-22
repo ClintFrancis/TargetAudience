@@ -6,6 +6,9 @@ namespace TargetAudience.Common.Models
 {
 	public class Member
 	{
+		[JsonProperty(PropertyName = "id")]
+		public string Id { get; set; }
+
 		[JsonProperty("gender")]
 		public GenderType Gender { get; set; }
 
@@ -38,5 +41,10 @@ namespace TargetAudience.Common.Models
 
 		[JsonProperty("location")]
 		public string Location { get; set; }
+
+		public override string ToString()
+		{
+			return JsonConvert.SerializeObject(this);
+		}
 	}
 }

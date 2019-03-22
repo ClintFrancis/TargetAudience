@@ -12,10 +12,13 @@ namespace TargetAudience.Functions.Services
 	{
 		private readonly object _syncroot = new object();
 		Dictionary<string, List<Member>> memory;
+		List<Member> memoryList;
+
 
 		public AudienceMemoryStorage(Dictionary<string, List<Member>> dictionary = null)
 		{
 			memory = dictionary ?? new Dictionary<string, List<Member>>();
+			memoryList = new List<Member>();
 		}
 
 		/// <summary>
@@ -24,20 +27,18 @@ namespace TargetAudience.Functions.Services
 		/// <returns>The async.</returns>
 		/// <param name="locations">Locations.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public Task DeleteAsync(string[] locations, CancellationToken cancellationToken)
+		public Task<int> DeleteAsync(string[] locations, CancellationToken cancellationToken)
 		{
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
+			int count = 0;
 			lock (_syncroot)
 			{
-				foreach (var key in locations)
-				{
-					memory.Remove(key);
-				}
+				count = memoryList.RemoveAll(x => locations.Contains(x.Location));
 			}
 
-			return Task.CompletedTask;
+			return Task.FromResult(count);
 		}
 
 		/// <summary>
@@ -46,27 +47,21 @@ namespace TargetAudience.Functions.Services
 		/// <returns>The async.</returns>
 		/// <param name="locations">Locations.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public Task<IDictionary<string, List<Member>>> ReadAsync(string[] locations, CancellationToken cancellationToken)
+		public Task<List<Member>> ReadAsync(string[] locations, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
-			var storeItems = new Dictionary<string, List<Member>>(locations.Length);
+			var items = new List<Member>();
+			if (maxItemCount == -1)
+				maxItemCount = 999;
+
 			lock (_syncroot)
 			{
-				foreach (var key in locations)
-				{
-					if (memory.TryGetValue(key, out var list))
-					{
-						if (list != null)
-						{
-							storeItems.Add(key, list.ToList());
-						}
-					}
-				}
+				items = memoryList.Where(x => locations.Contains(x.Location)).Select(x => x).Take(maxItemCount).ToList();
 			}
 
-			return Task.FromResult<IDictionary<string, List<Member>>>(storeItems);
+			return Task.FromResult<List<Member>>(items);
 		}
 
 		/// <summary>
@@ -75,7 +70,7 @@ namespace TargetAudience.Functions.Services
 		/// <returns>The async.</returns>
 		/// <param name="changes">Changes.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public Task WriteAsync(IDictionary<string, List<Member>> changes, CancellationToken cancellationToken)
+		public Task<List<Member>> WriteAsync(List<Member> changes, CancellationToken cancellationToken)
 		{
 			if (changes == null)
 			{
@@ -84,23 +79,15 @@ namespace TargetAudience.Functions.Services
 
 			lock (_syncroot)
 			{
-				foreach (var change in changes)
-				{
-					List<Member> newState = new List<Member>(change.Value);
-
-					if (memory.TryGetValue(change.Key, out var oldState))
-					{
-						newState.AddRange(oldState);
-					}
-
-					memory[change.Key] = newState;
-				}
+				// TODO consider overwrite option?
+				memoryList.AddRange(changes);
 			}
 
-			return Task.CompletedTask;
+			return Task.FromResult(changes);
 		}
 
-		public Task WriteAsync(string location, List<Member> changes, CancellationToken cancellationToken)
+		// TODO Depreciate?
+		public Task<List<Member>> WriteAsync(string location, List<Member> changes, CancellationToken cancellationToken)
 		{
 			if (string.IsNullOrEmpty(location))
 				throw new ArgumentException("Location value cannot be null");
@@ -110,16 +97,13 @@ namespace TargetAudience.Functions.Services
 
 			lock (_syncroot)
 			{
-				List<Member> newState = new List<Member>(changes);
-				if (memory.TryGetValue(location, out var oldState))
-				{
-					newState.AddRange(oldState);
-				}
+				foreach (var item in changes)
+					item.Location = location;
 
-				memory[location] = newState;
+				memoryList.AddRange(changes);
 			}
 
-			return Task.CompletedTask;
+			return Task.FromResult(changes);
 		}
 
 		/// <summary>
@@ -130,7 +114,7 @@ namespace TargetAudience.Functions.Services
 		/// <param name="fromDate">From date.</param>
 		/// <param name="toDate">To date.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public Task<IDictionary<string, List<Member>>> QueryTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public Task<List<Member>> QueryTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
 		{
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
@@ -139,31 +123,28 @@ namespace TargetAudience.Functions.Services
 			if (diff < TimeSpan.Zero)
 				throw new ArgumentException(nameof(fromDate));
 
-			var results = new Dictionary<string, List<Member>>(locations.Length);
+			var results = new List<Member>();
 
 			lock (_syncroot)
 			{
-				foreach (var key in locations)
-				{
-					if (memory.TryGetValue(key, out var list))
-					{
-						if (list != null)
-						{
-							results[key] = list
-							.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
-							.ToList();
-						}
-					}
-				}
+				results = memoryList.Where(x => locations.Contains(x.Location))
+					.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
+					.ToList();
 			}
 
-			return Task.FromResult<IDictionary<string, List<Member>>>(results);
+			return Task.FromResult<List<Member>>(results);
 		}
 
-		public Task<IDictionary<string, List<Member>>> QueryTimeSpan(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public Task<List<Member>> QueryTimeSpan(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
 		{
-			var keys = memory.Keys.ToArray();
-			return QueryTimeSpan(keys, fromDate, toDate, cancellationToken);
+			var results = new List<Member>();
+
+			lock (_syncroot)
+			{
+				results = memoryList.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks).ToList();
+			}
+
+			return Task.FromResult<List<Member>>(results);
 		}
 
 		public Task<List<LocationWindow>> QueryMemberLocations(string persistentMemberId, DateTime fromDate, DateTime toDate, TimeSpan minimumDuration, CancellationToken cancellationToken)
@@ -171,52 +152,47 @@ namespace TargetAudience.Functions.Services
 			var results = new List<LocationWindow>();
 			lock (_syncroot)
 			{
-				// Get all member results
-				foreach (var location in memory.Keys)
-				{
-					var locationEntries = memory[location];
-
-					var locationResults = locationEntries
+				// Find member results
+				var memberResults = memoryList
 						.Where(x => x.PersistedFaceId == persistentMemberId)
 						.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
 						.OrderBy(x => x.Timestamp)
 						.ToList();
 
-					if (locationResults.Count > 1)
-					{
-						Member prevEntry;
-						Member curEntry;
-						List<Member> windowEntries = new List<Member>();
-						windowEntries.Add(locationResults[0]);
+				results = memberResults.Select(x => x.Location).Distinct().Select(x => new LocationWindow() { Location = x }).ToList();
 
-						for (int i = 1; i < locationResults.Count; i++)
+				Member prevEntry;
+				Member curEntry;
+				List<Member> memberLocationResults;
+
+				// Populate each LocationWindow
+				foreach (var window in results)
+				{
+					memberLocationResults = memberResults
+						.Where(x => x.Location == window.Location)
+						.ToList();
+
+					List<Member> filteredWindowEntries = new List<Member>();
+					filteredWindowEntries.Add(memberLocationResults[0]);
+
+					if (memberLocationResults.Count() > 1)
+					{
+						for (int i = 1; i < memberLocationResults.Count(); i++)
 						{
-							prevEntry = locationResults[i - 1];
-							curEntry = locationResults[i];
+							// Compare member results to determine if the minimum duration has been met
+							prevEntry = memberLocationResults[i - 1];
+							curEntry = memberLocationResults[i];
 
 							var span = curEntry.Timestamp.Subtract(prevEntry.Timestamp);
 							if (span.Subtract(minimumDuration) > TimeSpan.Zero)
 							{
-								// We have an entry
-								windowEntries.Add(curEntry);
-							}
-
-							// Create a new LocationWindow
-							else
-							{
-								results.Add(LocationWindow.Create(location, windowEntries));
-
-								// Reset the window entries
-								windowEntries = new List<Member>();
-								windowEntries.Add(curEntry);
+								// We have a verified entry
+								filteredWindowEntries.Add(curEntry);
 							}
 						}
 					}
 
-					else
-					{
-						results.Add(LocationWindow.Create(location, locationResults));
-					}
+					window.AddMembers(filteredWindowEntries);
 				}
 			}
 
@@ -224,7 +200,7 @@ namespace TargetAudience.Functions.Services
 			return Task.FromResult<List<LocationWindow>>(orderedResults);
 		}
 
-		public Task<IDictionary<string, List<Member>>> UniqueMembersTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public Task<List<Member>> UniqueMembersTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
 		{
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
@@ -233,26 +209,19 @@ namespace TargetAudience.Functions.Services
 			if (diff < TimeSpan.Zero)
 				throw new ArgumentException(nameof(fromDate));
 
-			var results = new Dictionary<string, List<Member>>(locations.Length);
+			var results = new List<Member>();
 
 			lock (_syncroot)
 			{
-				foreach (var key in locations)
-				{
-					if (memory.TryGetValue(key, out var list))
-					{
-						if (list != null)
-						{
-							results[key] = list
-							.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
-							.Where(x => x.PersistedFaceId != null) // todo filter results so that we dont have duplicates?
-							.ToList();
-						}
-					}
-				}
+				results = memoryList
+					.Where(x => locations.Contains(x.Location))
+					.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
+					.Where(x => x.PersistedFaceId != null)
+					.Distinct()
+					.ToList();
 			}
 
-			return Task.FromResult<IDictionary<string, List<Member>>>(results);
+			return Task.FromResult<List<Member>>(results);
 		}
 	}
 }

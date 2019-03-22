@@ -11,6 +11,7 @@ using TargetAudience.Functions.Utils;
 
 namespace TargetAudience.Functions.Services
 {
+	// TODO Save and train! At the moment no persistent IDs are being stored properly
 	public static partial class FaceService
 	{
 		private static FaceClient _client;

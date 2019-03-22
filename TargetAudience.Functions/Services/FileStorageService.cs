@@ -25,13 +25,24 @@ namespace TargetAudience.Functions.Services
 
 		private FileStorageService()
 		{
-			storageAccount = CloudStorageAccount.Parse(storageConnection);
-			blobClient = storageAccount.CreateCloudBlobClient();
+			// Check whether the connection string can be parsed.
+			if (CloudStorageAccount.TryParse(storageConnection, out storageAccount))
+			{
+				blobClient = storageAccount.CreateCloudBlobClient();
+			}
+			else
+			{
+				// Otherwise, let the user know that they need to define the environment variable.
+				Console.WriteLine(
+					"A connection string has not been defined in the system environment variables. " +
+					"Add an environment variable named 'storageconnectionstring' with your storage " +
+					"connection string as a value.");
+			}
 		}
 
 		public async Task<Uri> StoreImage(byte[] image, string containerName, string fileName)
 		{
-			var blockBlob = GetBlockBlob(containerName, fileName);
+			var blockBlob = await GetBlockBlob(containerName, fileName);
 			await blockBlob.UploadFromByteArrayAsync(image, 0, image.Length);
 
 			return blockBlob.Uri;
@@ -39,15 +50,25 @@ namespace TargetAudience.Functions.Services
 
 		public async Task<Uri> StoreImage(Stream image, string containerName, string fileName)
 		{
-			var blockBlob = GetBlockBlob(containerName, fileName);
+			var blockBlob = await GetBlockBlob(containerName, fileName);
 			await blockBlob.UploadFromStreamAsync(image, image.Length);
 
 			return blockBlob.Uri;
 		}
 
-		CloudBlockBlob GetBlockBlob(string containerName, string fileName)
+		async Task<CloudBlockBlob> GetBlockBlob(string containerName, string fileName)
 		{
 			CloudBlobContainer container = blobClient.GetContainerReference(containerName);
+
+			if (await container.CreateIfNotExistsAsync())
+			{
+				var permissions = new BlobContainerPermissions
+				{
+					PublicAccess = BlobContainerPublicAccessType.Blob
+				};
+				await container.SetPermissionsAsync(permissions);
+			}
+
 			return container.GetBlockBlobReference(fileName);
 		}
 

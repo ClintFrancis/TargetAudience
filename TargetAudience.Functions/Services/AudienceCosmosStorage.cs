@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using TargetAudience.Common.Interfaces;
 using TargetAudience.Common.Models;
@@ -11,20 +12,62 @@ namespace TargetAudience.Functions.Services
 {
 	public class AudienceCosmosStorage : IAudienceStorageService
 	{
-		private readonly object _syncroot = new object();
-
 		internal DocumentClient Client { get; private set; }
-		public Uri AudienceCollectionUri { get; private set; }
-
-		const string AUDIENCE = "audience";
+		internal Uri AudienceCollectionUri { get; private set; }
+		bool initialized;
+		string databaseName;
+		string collectionName;
 
 		public AudienceCosmosStorage()
 		{
+
+		}
+
+		public async Task CheckInitialized()
+		{
+			if (initialized)
+				return;
+
 			var endpoint = Environment.GetEnvironmentVariable("DocumentEndpointUri");
 			var key = Environment.GetEnvironmentVariable("DocumentAuthKey");
+			databaseName = Environment.GetEnvironmentVariable("DocumentDatabaseName");
+			collectionName = Environment.GetEnvironmentVariable("DocumentCollectionName");
+
+			if (String.IsNullOrEmpty(endpoint))
+			{
+				throw new MissingFieldException("A DocumentEndpointUri string has not been defined in the system environment variables. " +
+					"Add an environment variable named 'DocumentEndpointUri' with your " +
+					"connection string as a value.");
+			}
+			if (String.IsNullOrEmpty(key))
+			{
+				throw new MissingFieldException(
+					"A DocumentAuthKey string has not been defined in the system environment variables. " +
+					"Add an environment variable named 'DocumentAuthKey' with your" +
+					"Auth Key string as a value.");
+			}
+			if (String.IsNullOrEmpty(databaseName))
+			{
+				throw new MissingFieldException(
+					"A DatabaseId string has not been defined in the system environment variables. " +
+					"Add an environment variable named 'DatabaseId' with your" +
+					"Database Id string as a value.");
+			}
+
+			if (String.IsNullOrEmpty(collectionName))
+			{
+				throw new MissingFieldException(
+					"A CollectionId string has not been defined in the system environment variables. " +
+					"Add an environment variable named 'CollectionId' with your" +
+					"Collection Id string as a value.");
+			}
 
 			Client = new DocumentClient(new Uri(endpoint), key);
-			AudienceCollectionUri = UriFactory.CreateDocumentCollectionUri(AUDIENCE, AUDIENCE);
+			await Client.CreateDatabaseIfNotExistsAsync(new Database { Id = databaseName });
+			await Client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(databaseName), new DocumentCollection { Id = collectionName });
+			AudienceCollectionUri = UriFactory.CreateDocumentCollectionUri(databaseName, collectionName);
+
+			initialized = true;
 		}
 
 		/// <summary>
@@ -33,25 +76,28 @@ namespace TargetAudience.Functions.Services
 		/// <returns>The async.</returns>
 		/// <param name="locations">Locations.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public Task DeleteAsync(string[] locations, CancellationToken cancellationToken)
+		public async Task<int> DeleteAsync(string[] locations, CancellationToken cancellationToken)
 		{
-			throw new NotImplementedException();
+			await CheckInitialized();
 
-			/*
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
-			lock (_syncroot)
+			var results = Client.CreateDocumentQuery<Member>(AudienceCollectionUri)
+					.Where(x => locations.Contains(x.Location))
+					.ToList();
+
+			int deleted = 0;
+			foreach (var item in results)
 			{
-				foreach (var key in locations)
-				{
-					//memory.Remove(key);
-				}
+				var result = await Client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(databaseName, collectionName, item.Id));
+				deleted++;
 			}
 
-			return Task.CompletedTask;
-			*/
+			return deleted;
 		}
+
+		// todo delete within timeframe DateTime fromDate, DateTime toDate, 
 
 		/// <summary>
 		/// Reads storage items from storage.
@@ -59,31 +105,20 @@ namespace TargetAudience.Functions.Services
 		/// <returns>The async.</returns>
 		/// <param name="locations">Locations.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public Task<IDictionary<string, List<Member>>> ReadAsync(string[] locations, CancellationToken cancellationToken)
+		public async Task<List<Member>> ReadAsync(string[] locations, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
-			throw new NotImplementedException();
+			await CheckInitialized();
 
-			/*
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
-			var storeItems = new Dictionary<string, List<Member>>(locations.Length);
-			lock (_syncroot)
-			{
-				foreach (var key in locations)
-				{
-					//if (memory.TryGetValue(key, out var list))
-					//{
-					//	if (list != null)
-					//	{
-					//		storeItems.Add(key, list.ToList());
-					//	}
-					//}
-				}
-			}
+			var items = new List<Member>();
+			FeedOptions queryOptions = (maxItemCount > 0) ? new FeedOptions { MaxItemCount = maxItemCount } : null;
+			items = Client.CreateDocumentQuery<Member>(AudienceCollectionUri, queryOptions)
+					.Where(x => locations.Contains(x.Location))
+					.ToList();
 
-			return Task.FromResult<IDictionary<string, List<Member>>>(storeItems);
-			*/
+			return items;
 		}
 
 		/// <summary>
@@ -92,77 +127,56 @@ namespace TargetAudience.Functions.Services
 		/// <returns>The async.</returns>
 		/// <param name="changes">Changes.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public Task WriteAsync(IDictionary<string, List<Member>> changes, CancellationToken cancellationToken)
+		public async Task<List<Member>> WriteAsync(List<Member> changes, CancellationToken cancellationToken)
 		{
+			await CheckInitialized();
+
 			if (changes == null)
 				throw new ArgumentNullException(nameof(changes));
 
-			throw new NotImplementedException();
-
-			/*
-			// If its new, then save it
-			if (string.IsNullOrEmpty(order.id))
+			var response = new List<Member>();
+			foreach (var item in changes)
 			{
-				var collection = await Client.ReadDocumentCollectionAsync(OrderCollectionUri);
-				var value = collection.CurrentResourceQuotaUsage;
-
-				var totalDocuments = int.Parse(value.Split(';').Where(v => v.Contains("documentsCount")).FirstOrDefault().Split('=')[1]);
-				order.OrderNumber = totalDocuments + 1;
-
-				var result = await Client.CreateDocumentAsync(OrderCollectionUri, order);
-				order.id = result.Resource.Id;
-				return order;
+				var result = await Client.CreateDocumentAsync(AudienceCollectionUri, item);
+				item.Id = result.Resource.Id;
+				response.Add(item);
 			}
 
-			// Otherwise return the existing id
-			await Client.UpsertDocumentAsync(OrderCollectionUri, order);
-			return order;
-			*/
-			/*
-
-			lock (_syncroot)
-			{
-				foreach (var change in changes)
-				{
-					List<Member> newState = new List<Member>(change.Value);
-
-					//if (memory.TryGetValue(change.Key, out var oldState))
-					//{
-					//	newState.AddRange(oldState);
-					//}
-
-					//memory[change.Key] = newState;
-				}
-			}
-
-			return Task.CompletedTask;
-			*/
+			return response;
 		}
 
-		public Task WriteAsync(string location, List<Member> changes, CancellationToken cancellationToken)
+		public async Task<List<Member>> WriteAsync(string location, List<Member> changes, CancellationToken cancellationToken)
 		{
-			throw new NotImplementedException();
+			await CheckInitialized();
 
-			/*
 			if (string.IsNullOrEmpty(location))
 				throw new ArgumentException("Location value cannot be null");
 
 			if (changes == null)
 				throw new ArgumentNullException(nameof(changes));
 
-			lock (_syncroot)
+			var response = new List<Member>();
+			try
 			{
-				List<Member> newState = new List<Member>(changes);
-				//if (memory.TryGetValue(location, out var oldState))
-				//{
-				//	newState.AddRange(oldState);
-				//}
-
-				//memory[location] = newState;
+				foreach (var item in changes)
+				{
+					item.Location = location;
+					//var test = UriFactory.CreateDocumentUri(databaseName, collectionName, new Guid().ToString());
+					var result = await Client.UpsertDocumentAsync(AudienceCollectionUri, item);
+					item.Id = result.Resource.Id;
+					response.Add(item);
+				}
+			}
+			catch (DocumentClientException de)
+			{
+				Console.WriteLine(de.Message);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
 			}
 
-			return Task.CompletedTask;
-			*/
+			return response;
 		}
 
 		/// <summary>
@@ -173,11 +187,11 @@ namespace TargetAudience.Functions.Services
 		/// <param name="fromDate">From date.</param>
 		/// <param name="toDate">To date.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public Task<IDictionary<string, List<Member>>> QueryTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public async Task<List<Member>> QueryTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
 		{
+			await CheckInitialized();
 			throw new NotImplementedException();
 
-			/*
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
@@ -185,102 +199,88 @@ namespace TargetAudience.Functions.Services
 			if (diff < TimeSpan.Zero)
 				throw new ArgumentException(nameof(fromDate));
 
-			var results = new Dictionary<string, List<Member>>(locations.Length);
+			var results = new List<Member>();
 
-			lock (_syncroot)
-			{
-				foreach (var key in locations)
-				{
-					//if (memory.TryGetValue(key, out var list))
-					//{
-					//	if (list != null)
-					//	{
-					//		results[key] = list
-					//		.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
-					//		.ToList();
-					//	}
-					//}
-				}
-			}
+			//results = memoryList.Where(x => locations.Contains(x.Location))
+			//.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
+			//.ToList();
 
-			return Task.FromResult<IDictionary<string, List<Member>>>(results);
-			*/
+
+			return results;
 		}
 
-		public Task<IDictionary<string, List<Member>>> QueryTimeSpan(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public async Task<List<Member>> QueryTimeSpan(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
 		{
+			await CheckInitialized();
 			throw new NotImplementedException();
-			//var keys = memory.Keys.ToArray();
-			//return QueryTimeSpan(keys, fromDate, toDate, cancellationToken);
+
+			var results = new List<Member>();
+
+			//results = memoryList.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks).ToList();
+
+			return results;
 		}
 
-		public Task<List<LocationWindow>> QueryMemberLocations(string persistentMemberId, DateTime fromDate, DateTime toDate, TimeSpan minimumDuration, CancellationToken cancellationToken)
+		public async Task<List<LocationWindow>> QueryMemberLocations(string persistentMemberId, DateTime fromDate, DateTime toDate, TimeSpan minimumDuration, CancellationToken cancellationToken)
 		{
+			await CheckInitialized();
 			throw new NotImplementedException();
 
-			/*
 			var results = new List<LocationWindow>();
-			lock (_syncroot)
-			{
-				// Get all member results
-				foreach (var location in memory.Keys)
-				{
-					var locationEntries = memory[location];
-
-					var locationResults = locationEntries
+			/*
+				// Find member results
+				var memberResults = memoryList
 						.Where(x => x.PersistedFaceId == persistentMemberId)
 						.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
 						.OrderBy(x => x.Timestamp)
 						.ToList();
 
-					if (locationResults.Count > 1)
-					{
-						Member prevEntry;
-						Member curEntry;
-						List<Member> windowEntries = new List<Member>();
-						windowEntries.Add(locationResults[0]);
+				results = memberResults.Select(x => x.Location).Distinct().Select(x => new LocationWindow() { Location = x }).ToList();
 
-						for (int i = 1; i < locationResults.Count; i++)
+				Member prevEntry;
+				Member curEntry;
+				List<Member> memberLocationResults;
+
+				// Populate each LocationWindow
+				foreach (var window in results)
+				{
+					memberLocationResults = memberResults
+						.Where(x => x.Location == window.Location)
+						.ToList();
+
+					List<Member> filteredWindowEntries = new List<Member>();
+					filteredWindowEntries.Add(memberLocationResults[0]);
+
+					if (memberLocationResults.Count() > 1)
+					{
+						for (int i = 1; i < memberLocationResults.Count(); i++)
 						{
-							prevEntry = locationResults[i - 1];
-							curEntry = locationResults[i];
+							// Compare member results to determine if the minimum duration has been met
+							prevEntry = memberLocationResults[i - 1];
+							curEntry = memberLocationResults[i];
 
 							var span = curEntry.Timestamp.Subtract(prevEntry.Timestamp);
 							if (span.Subtract(minimumDuration) > TimeSpan.Zero)
 							{
-								// We have an entry
-								windowEntries.Add(curEntry);
-							}
-
-							// Create a new LocationWindow
-							else
-							{
-								results.Add(LocationWindow.Create(location, windowEntries));
-
-								// Reset the window entries
-								windowEntries = new List<Member>();
-								windowEntries.Add(curEntry);
+								// We have a verified entry
+								filteredWindowEntries.Add(curEntry);
 							}
 						}
 					}
 
-					else
-					{
-						results.Add(LocationWindow.Create(location, locationResults));
-					}
+					window.AddMembers(filteredWindowEntries);
 				}
-			}
+			*/
 
 			var orderedResults = results.OrderBy(x => x.StartDate).ToList();
-			return Task.FromResult<List<LocationWindow>>(orderedResults);
-			*/
+			return orderedResults;
 		}
 
-		public Task<IDictionary<string, List<Member>>> UniqueMembersTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public async Task<List<Member>> UniqueMembersTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
 		{
+			await CheckInitialized();
 			throw new NotImplementedException();
 
-			/*
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
@@ -288,27 +288,17 @@ namespace TargetAudience.Functions.Services
 			if (diff < TimeSpan.Zero)
 				throw new ArgumentException(nameof(fromDate));
 
-			var results = new Dictionary<string, List<Member>>(locations.Length);
+			var results = new List<Member>();
 
-			lock (_syncroot)
-			{
-				foreach (var key in locations)
-				{
-					if (memory.TryGetValue(key, out var list))
-					{
-						if (list != null)
-						{
-							results[key] = list
-							.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
-							.Where(x => x.PersistedFaceId != null) // todo filter results so that we dont have duplicates?
-							.ToList();
-						}
-					}
-				}
-			}
 
-			return Task.FromResult<IDictionary<string, List<Member>>>(results);
-			*/
+			//results = memoryList
+			//.Where(x => locations.Contains(x.Location))
+			//.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
+			//.Where(x => x.PersistedFaceId != null)
+			//.Distinct()
+			//.ToList();
+
+			return results;
 		}
 	}
 }
