@@ -13,7 +13,7 @@ namespace TargetAudience.Functions.Services
 	public class AudienceCosmosStorage : IAudienceStorageService
 	{
 		internal DocumentClient Client { get; private set; }
-		internal Uri AudienceCollectionUri { get; private set; }
+		DocumentCollection audienceCollection;
 		bool initialized;
 		string databaseName;
 		string collectionName;
@@ -63,9 +63,13 @@ namespace TargetAudience.Functions.Services
 			}
 
 			Client = new DocumentClient(new Uri(endpoint), key);
+
+			// Create the Database if required
 			await Client.CreateDatabaseIfNotExistsAsync(new Database { Id = databaseName });
-			await Client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(databaseName), new DocumentCollection { Id = collectionName });
-			AudienceCollectionUri = UriFactory.CreateDocumentCollectionUri(databaseName, collectionName);
+
+			// Get a reference to the Document Collection
+			var response = await Client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(databaseName), new DocumentCollection { Id = collectionName });
+			audienceCollection = response.Resource;
 
 			initialized = true;
 		}
@@ -83,7 +87,7 @@ namespace TargetAudience.Functions.Services
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
-			var results = Client.CreateDocumentQuery<Member>(AudienceCollectionUri)
+			var results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink)
 					.Where(x => locations.Contains(x.Location))
 					.ToList();
 
@@ -114,7 +118,7 @@ namespace TargetAudience.Functions.Services
 
 			var items = new List<Member>();
 			FeedOptions queryOptions = (maxItemCount > 0) ? new FeedOptions { MaxItemCount = maxItemCount } : null;
-			items = Client.CreateDocumentQuery<Member>(AudienceCollectionUri, queryOptions)
+			items = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink, queryOptions)
 					.Where(x => locations.Contains(x.Location))
 					.ToList();
 
@@ -137,7 +141,7 @@ namespace TargetAudience.Functions.Services
 			var response = new List<Member>();
 			foreach (var item in changes)
 			{
-				var result = await Client.CreateDocumentAsync(AudienceCollectionUri, item);
+				var result = await Client.CreateDocumentAsync(audienceCollection.SelfLink, item);
 				item.Id = result.Resource.Id;
 				response.Add(item);
 			}
@@ -161,8 +165,7 @@ namespace TargetAudience.Functions.Services
 				foreach (var item in changes)
 				{
 					item.Location = location;
-					//var test = UriFactory.CreateDocumentUri(databaseName, collectionName, new Guid().ToString());
-					var result = await Client.UpsertDocumentAsync(AudienceCollectionUri, item);
+					var result = await Client.UpsertDocumentAsync(audienceCollection.SelfLink, item);
 					item.Id = result.Resource.Id;
 					response.Add(item);
 				}
