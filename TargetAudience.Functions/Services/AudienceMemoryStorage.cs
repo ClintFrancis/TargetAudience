@@ -86,7 +86,6 @@ namespace TargetAudience.Functions.Services
 			return Task.FromResult(changes);
 		}
 
-		// TODO Depreciate?
 		public Task<List<Member>> WriteAsync(string location, List<Member> changes, CancellationToken cancellationToken)
 		{
 			if (string.IsNullOrEmpty(location))
@@ -111,43 +110,43 @@ namespace TargetAudience.Functions.Services
 		/// </summary>
 		/// <returns>The time span.</returns>
 		/// <param name="locations">Locations.</param>
-		/// <param name="fromDate">From date.</param>
-		/// <param name="toDate">To date.</param>
+		/// <param name="startDate">From date.</param>
+		/// <param name="endDate">To date.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public Task<List<Member>> QueryTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public Task<List<Member>> QueryTimeSpan(string[] locations, DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
-			var diff = toDate.Subtract(fromDate);
+			var diff = endDate.Subtract(startDate);
 			if (diff < TimeSpan.Zero)
-				throw new ArgumentException(nameof(fromDate));
+				throw new ArgumentException(nameof(startDate));
 
 			var results = new List<Member>();
 
 			lock (_syncroot)
 			{
 				results = memoryList.Where(x => locations.Contains(x.Location))
-					.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
+					.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
 					.ToList();
 			}
 
 			return Task.FromResult<List<Member>>(results);
 		}
 
-		public Task<List<Member>> QueryTimeSpan(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public Task<List<Member>> QueryTimeSpan(DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			var results = new List<Member>();
 
 			lock (_syncroot)
 			{
-				results = memoryList.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks).ToList();
+				results = memoryList.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate).ToList();
 			}
 
 			return Task.FromResult<List<Member>>(results);
 		}
 
-		public Task<List<LocationWindow>> QueryMemberLocations(string persistentMemberId, DateTime fromDate, DateTime toDate, TimeSpan minimumDuration, CancellationToken cancellationToken)
+		public Task<List<LocationWindow>> QueryMemberLocations(string persistentMemberId, DateTime startDate, DateTime endDate, TimeSpan minimumDuration, CancellationToken cancellationToken)
 		{
 			var results = new List<LocationWindow>();
 			lock (_syncroot)
@@ -155,11 +154,11 @@ namespace TargetAudience.Functions.Services
 				// Find member results
 				var memberResults = memoryList
 						.Where(x => x.PersistedFaceId == persistentMemberId)
-						.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
+						.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
 						.OrderBy(x => x.Timestamp)
 						.ToList();
 
-				results = memberResults.Select(x => x.Location).Distinct().Select(x => new LocationWindow() { Location = x }).ToList();
+				results = memberResults.DistinctBy(x => x.Location).Select(x => new LocationWindow() { Location = x.Location }).ToList();
 
 				Member prevEntry;
 				Member curEntry;
@@ -200,14 +199,14 @@ namespace TargetAudience.Functions.Services
 			return Task.FromResult<List<LocationWindow>>(orderedResults);
 		}
 
-		public Task<List<Member>> UniqueMembersTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public Task<List<Member>> UniqueMembersTimeSpan(string[] locations, DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
-			var diff = toDate.Subtract(fromDate);
+			var diff = endDate.Subtract(startDate);
 			if (diff < TimeSpan.Zero)
-				throw new ArgumentException(nameof(fromDate));
+				throw new ArgumentException(nameof(startDate));
 
 			var results = new List<Member>();
 
@@ -215,9 +214,9 @@ namespace TargetAudience.Functions.Services
 			{
 				results = memoryList
 					.Where(x => locations.Contains(x.Location))
-					.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
+					.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
 					.Where(x => x.PersistedFaceId != null)
-					.Distinct()
+					.DistinctBy(x => x.PersistedFaceId)
 					.ToList();
 			}
 

@@ -87,15 +87,28 @@ namespace TargetAudience.Functions.Services
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
-			var results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink)
+			int deleted = 0;
+			try
+			{
+				var results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink)
 					.Where(x => locations.Contains(x.Location))
 					.ToList();
 
-			int deleted = 0;
-			foreach (var item in results)
+				foreach (var item in results)
+				{
+					var result = await Client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(databaseName, collectionName, item.Id));
+					deleted++;
+				}
+			}
+			catch (DocumentClientException de)
 			{
-				var result = await Client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(databaseName, collectionName, item.Id));
-				deleted++;
+				Console.WriteLine(de.Message);
+				throw de;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				throw ex;
 			}
 
 			return deleted;
@@ -117,10 +130,23 @@ namespace TargetAudience.Functions.Services
 				throw new ArgumentNullException(nameof(locations));
 
 			var items = new List<Member>();
-			FeedOptions queryOptions = (maxItemCount > 0) ? new FeedOptions { MaxItemCount = maxItemCount } : null;
-			items = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink, queryOptions)
-					.Where(x => locations.Contains(x.Location))
-					.ToList();
+			try
+			{
+				FeedOptions queryOptions = (maxItemCount > 0) ? new FeedOptions { MaxItemCount = maxItemCount } : null;
+				items = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink, queryOptions)
+						.Where(x => locations.Contains(x.Location))
+						.ToList();
+			}
+			catch (DocumentClientException de)
+			{
+				Console.WriteLine(de.Message);
+				throw de;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				throw ex;
+			}
 
 			return items;
 		}
@@ -139,11 +165,24 @@ namespace TargetAudience.Functions.Services
 				throw new ArgumentNullException(nameof(changes));
 
 			var response = new List<Member>();
-			foreach (var item in changes)
+			try
 			{
-				var result = await Client.CreateDocumentAsync(audienceCollection.SelfLink, item);
-				item.Id = result.Resource.Id;
-				response.Add(item);
+				foreach (var item in changes)
+				{
+					var result = await Client.CreateDocumentAsync(audienceCollection.SelfLink, item);
+					item.Id = result.Resource.Id;
+					response.Add(item);
+				}
+			}
+			catch (DocumentClientException de)
+			{
+				Console.WriteLine(de.Message);
+				throw de;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				throw ex;
 			}
 
 			return response;
@@ -173,10 +212,13 @@ namespace TargetAudience.Functions.Services
 			catch (DocumentClientException de)
 			{
 				Console.WriteLine(de.Message);
+				throw de;
+
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex.Message);
+				throw ex;
 			}
 
 			return response;
@@ -187,58 +229,88 @@ namespace TargetAudience.Functions.Services
 		/// </summary>
 		/// <returns>The time span.</returns>
 		/// <param name="locations">Locations.</param>
-		/// <param name="fromDate">From date.</param>
-		/// <param name="toDate">To date.</param>
+		/// <param name="startDate">From date.</param>
+		/// <param name="endDate">To date.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public async Task<List<Member>> QueryTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public async Task<List<Member>> QueryTimeSpan(string[] locations, DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			await CheckInitialized();
-			throw new NotImplementedException();
 
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
-			var diff = toDate.Subtract(fromDate);
+			var diff = endDate.Subtract(startDate);
 			if (diff < TimeSpan.Zero)
-				throw new ArgumentException(nameof(fromDate));
+				throw new ArgumentException(nameof(startDate));
 
 			var results = new List<Member>();
 
-			//results = memoryList.Where(x => locations.Contains(x.Location))
-			//.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
-			//.ToList();
+			try
+			{
+				FeedOptions queryOptions = (maxItemCount > 0) ? new FeedOptions { MaxItemCount = maxItemCount } : null;
+				results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink, queryOptions)
+					.Where(x => locations.Contains(x.Location))
+					.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
+					.ToList();
+			}
+			catch (DocumentClientException de)
+			{
+				Console.WriteLine(de.Message);
+				throw de;
 
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				throw ex;
+			}
 
 			return results;
 		}
 
-		public async Task<List<Member>> QueryTimeSpan(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public async Task<List<Member>> QueryTimeSpan(DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			await CheckInitialized();
-			throw new NotImplementedException();
 
 			var results = new List<Member>();
 
-			//results = memoryList.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks).ToList();
+			try
+			{
+				FeedOptions queryOptions = (maxItemCount > 0) ? new FeedOptions { MaxItemCount = maxItemCount } : null;
+				results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink, queryOptions)
+					.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
+					.ToList();
+			}
+			catch (DocumentClientException de)
+			{
+				Console.WriteLine(de.Message);
+				throw de;
+
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				throw ex;
+			}
 
 			return results;
 		}
 
-		public async Task<List<LocationWindow>> QueryMemberLocations(string persistentMemberId, DateTime fromDate, DateTime toDate, TimeSpan minimumDuration, CancellationToken cancellationToken)
+		public async Task<List<LocationWindow>> QueryMemberLocations(string persistentMemberId, DateTime startDate, DateTime endDate, TimeSpan minimumDuration, CancellationToken cancellationToken)
 		{
 			await CheckInitialized();
-			throw new NotImplementedException();
 
 			var results = new List<LocationWindow>();
-			/*
-				// Find member results
-				var memberResults = memoryList
-						.Where(x => x.PersistedFaceId == persistentMemberId)
-						.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
-						.OrderBy(x => x.Timestamp)
-						.ToList();
 
-				results = memberResults.Select(x => x.Location).Distinct().Select(x => new LocationWindow() { Location = x }).ToList();
+			try
+			{
+				var memberResults = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink)
+					.Where(x => x.PersistedFaceId == persistentMemberId)
+					.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
+					.OrderBy(x => x.Timestamp)
+					.ToList();
+
+				results = memberResults.DistinctBy(x => x.Location).Select(x => new LocationWindow() { Location = x.Location }).ToList();
 
 				Member prevEntry;
 				Member curEntry;
@@ -273,35 +345,75 @@ namespace TargetAudience.Functions.Services
 
 					window.AddMembers(filteredWindowEntries);
 				}
-			*/
+
+			}
+			catch (DocumentClientException de)
+			{
+				Console.WriteLine(de.Message);
+				throw de;
+
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				throw ex;
+			}
 
 			var orderedResults = results.OrderBy(x => x.StartDate).ToList();
 			return orderedResults;
 		}
 
-		public async Task<List<Member>> UniqueMembersTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+		public async Task<List<Member>> UniqueMembersTimeSpan(string[] locations, DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			await CheckInitialized();
-			throw new NotImplementedException();
 
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
 
-			var diff = toDate.Subtract(fromDate);
+			var diff = endDate.Subtract(startDate);
 			if (diff < TimeSpan.Zero)
-				throw new ArgumentException(nameof(fromDate));
+				throw new ArgumentException(nameof(startDate));
 
 			var results = new List<Member>();
+			try
+			{
+				//MemberComparer comparer = new MemberComparer();
+				FeedOptions queryOptions = (maxItemCount > 0) ? new FeedOptions { MaxItemCount = maxItemCount } : null;
+				results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink, queryOptions)
+					.Where(x => locations.Contains(x.Location))
+					.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
+					.Where(x => x.PersistedFaceId != null && x.PersistedFaceId != string.Empty)
+					.DistinctBy(x => x.PersistedFaceId)
+					.ToList();
+			}
+			catch (DocumentClientException de)
+			{
+				Console.WriteLine(de.Message);
+				throw de;
 
-
-			//results = memoryList
-			//.Where(x => locations.Contains(x.Location))
-			//.Where(x => x.Timestamp.Ticks > fromDate.Ticks && x.Timestamp.Ticks < toDate.Ticks)
-			//.Where(x => x.PersistedFaceId != null)
-			//.Distinct()
-			//.ToList();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				throw ex;
+			}
 
 			return results;
 		}
+
+		//internal class MemberComparer : EqualityComparer<Member>
+		//{
+		//	public override bool Equals(Member x, Member y)
+		//	{
+		//		return x.PersistedFaceId == y.PersistedFaceId;
+		//	}
+
+		//	public override int GetHashCode(Member obj)
+		//	{
+		//		return obj == null ? 0 :
+		//		(string.IsNullOrEmpty(obj.PersistedFaceId)) ? obj.Id.GetHashCode() : obj.PersistedFaceId.GetHashCode();
+		//	}
+		//}
+
 	}
 }

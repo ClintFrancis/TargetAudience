@@ -11,7 +11,6 @@ using TargetAudience.Functions.Utils;
 
 namespace TargetAudience.Functions.Services
 {
-	// TODO Save and train! At the moment no persistent IDs are being stored properly
 	public static partial class FaceService
 	{
 		private static FaceClient _client;
@@ -89,10 +88,6 @@ namespace TargetAudience.Functions.Services
 		/// <param name="imageFileStream">Image file stream.</param>
 		public static async Task<List<Member>> CaptureMembers(Stream imageFileStream, DateTime timestamp)
 		{
-			#region TEMP
-			await ResetFaceLists();
-			#endregion
-
 			try
 			{
 				string fileName = Guid.NewGuid().ToString() + ".png";

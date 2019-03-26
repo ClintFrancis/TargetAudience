@@ -60,7 +60,7 @@ namespace TargetAudience.Functions.Utils
 
 			result.Total = totalMales + totalFemales;
 			result.AverageAge = Math.Round(averageAge);
-			result.AverageGender = (totalMales > totalFemales) ? GenderType.Male : GenderType.Female;
+			result.AverageGender = (result.Total > 0) ? ((totalMales > totalFemales) ? GenderType.Male : GenderType.Female) : GenderType.None;
 
 			return result;
 		}

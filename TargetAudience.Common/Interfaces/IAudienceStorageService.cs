@@ -12,8 +12,9 @@ namespace TargetAudience.Common.Interfaces
 		Task<List<Member>> ReadAsync(string[] locations, CancellationToken cancellationToken, int maxItemCount = -1);
 		Task<List<Member>> WriteAsync(List<Member> changes, CancellationToken cancellationToken);
 		Task<List<Member>> WriteAsync(string location, List<Member> changes, CancellationToken cancellationToken);
-		Task<List<Member>> QueryTimeSpan(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken);
-		Task<List<Member>> QueryTimeSpan(string[] locations, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken);
-		Task<List<LocationWindow>> QueryMemberLocations(string persistentMemberId, DateTime fromDate, DateTime toDate, TimeSpan minimumDuration, CancellationToken cancellationToken);
+		Task<List<Member>> QueryTimeSpan(DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1);
+		Task<List<Member>> QueryTimeSpan(string[] locations, DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1);
+		Task<List<LocationWindow>> QueryMemberLocations(string persistentMemberId, DateTime startDate, DateTime endDate, TimeSpan minimumDuration, CancellationToken cancellationToken);
+		Task<List<Member>> UniqueMembersTimeSpan(string[] locations, DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1);
 	}
 }

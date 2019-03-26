@@ -92,12 +92,9 @@ namespace TargetAudience.Functions.Services
 			}
 		}
 
+
 		public static async Task<SimilarFace> FindSimilarPersistedFaceAsync(string imageUrl, Guid faceId, DetectedFace face)
 		{
-			// TEMP
-			await ResetFaceLists();
-
-
 			if (faceLists == null)
 			{
 				await Initialize();

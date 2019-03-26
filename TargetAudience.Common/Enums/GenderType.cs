@@ -9,6 +9,6 @@ namespace TargetAudience.Common.Enums
 	{
 		Male,
 		Female,
-		Genderless
+		None
 	}
 }

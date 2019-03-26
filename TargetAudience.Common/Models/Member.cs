@@ -4,7 +4,7 @@ using TargetAudience.Common.Enums;
 
 namespace TargetAudience.Common.Models
 {
-	public class Member
+	public class Member : IEquatable<Member>
 	{
 		[JsonProperty(PropertyName = "id")]
 		public string Id { get; set; }
@@ -41,6 +41,19 @@ namespace TargetAudience.Common.Models
 
 		[JsonProperty("location")]
 		public string Location { get; set; }
+
+
+		public bool Equals(Member other)
+		{
+			////Check whether the compared object is null. 
+			//if (Object.ReferenceEquals(other, null)) return false;
+
+			////Check whether the compared object references the same data. 
+			//if (Object.ReferenceEquals(this, other)) return true;
+
+			//Check whether the PersistedFaceID properties are equal. 
+			return PersistedFaceId.Equals(other.PersistedFaceId);
+		}
 
 		public override string ToString()
 		{

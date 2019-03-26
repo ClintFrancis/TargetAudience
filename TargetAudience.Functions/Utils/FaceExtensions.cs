@@ -43,7 +43,7 @@ namespace TargetAudience.Functions.Utils
 			if (gender == Gender.Female)
 				return GenderType.Female;
 
-			return GenderType.Genderless;
+			return GenderType.None;
 		}
 	}
 }

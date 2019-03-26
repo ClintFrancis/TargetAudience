@@ -22,7 +22,6 @@ namespace TargetAudience.Functions
 	public static class TargetedAds
 	{
 		static IAudienceStorageService storage = new AudienceCosmosStorage();
-		//static FaceService faceService = new FaceService();
 		const string DefaultLocationId = "default";
 
 		[FunctionName("CaptureAudience")]
@@ -119,12 +118,17 @@ namespace TargetAudience.Functions
 
 			try
 			{
-				var currentTime = DateTime.Now;
-				var pastTime = currentTime.Subtract(TimeSpan.FromMinutes(data.Minutes));
+				var endDate = (data.EndDate != default(DateTime)) ? data.EndDate : DateTime.Now;
+				var startDate = (data.StartDate != default(DateTime)) ? data.StartDate : endDate.Subtract(TimeSpan.FromMinutes(data.Minutes));
 				var token = new System.Threading.CancellationToken();
 				var locations = (data.Locations?.Length > 0) ? data.Locations : new string[] { DefaultLocationId };
 
-				var collection = await storage.QueryTimeSpan(locations, pastTime, currentTime, token);
+				List<Member> collection;
+				if (data.UniqueMembers)
+					collection = await storage.UniqueMembersTimeSpan(locations, startDate, endDate, token);
+
+				else
+					collection = await storage.QueryTimeSpan(locations, startDate, endDate, token);
 
 				response.Audience = MemberUtils.CreateAudience(collection);
 				response.StatusCode = (int)HttpStatusCode.OK;
