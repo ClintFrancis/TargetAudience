@@ -55,6 +55,31 @@ namespace TargetAudienceClient.Services
 			}
 		}
 
+		public static async Task<AudienceResponse> AudienceHistory(string[] locations, DateTime startDate, DateTime endDate, bool uniqueMembersOnly)
+		{
+			var post = new AudienceHistoryRequest();
+			post.StartDate = startDate;
+			post.EndDate = endDate;
+			post.Locations = locations;
+			post.UniqueMembersOnly = uniqueMembersOnly;
+
+			try
+			{
+				var json = JsonConvert.SerializeObject(post);
+				var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+				return await MakeRequest<AudienceResponse>(ProjectConfig.CaptureAudienceUrl, httpContent);
+			}
+			catch (Exception ex)
+			{
+				return new AudienceResponse()
+				{
+					Message = ex.Message,
+					ErrorCode = 1
+				};
+			}
+		}
+
 		/// <summary>
 		/// Makes the http requests.
 		/// </summary>

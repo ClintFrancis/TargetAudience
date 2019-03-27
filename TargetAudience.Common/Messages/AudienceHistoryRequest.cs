@@ -1,8 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
-using TargetAudience.Common.Models;
 
-namespace TargetAudience.Functions.Models
+namespace TargetAudience.Common.Messages
 {
 	public class AudienceHistoryRequest
 	{
@@ -15,8 +14,8 @@ namespace TargetAudience.Functions.Models
 		[JsonProperty("endDate")]
 		public DateTime EndDate { get; set; }
 
-		[JsonProperty("uniqueMembers")]
-		public bool UniqueMembers { get; set; }
+		[JsonProperty("uniqueMembersOnly")]
+		public bool UniqueMembersOnly { get; set; }
 
 		[JsonProperty("locations")]
 		public string[] Locations { get; set; }

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using Microcharts;
-using Microcharts.Forms;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 
 namespace TargetAudienceClient.Views
 {

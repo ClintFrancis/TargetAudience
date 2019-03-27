@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +12,6 @@ using Newtonsoft.Json;
 using TargetAudience.Common.Interfaces;
 using TargetAudience.Common.Messages;
 using TargetAudience.Common.Models;
-using TargetAudience.Functions.Models;
 using TargetAudience.Functions.Services;
 using TargetAudience.Functions.Utils;
 
@@ -124,7 +122,7 @@ namespace TargetAudience.Functions
 				var locations = (data.Locations?.Length > 0) ? data.Locations : new string[] { DefaultLocationId };
 
 				List<Member> collection;
-				if (data.UniqueMembers)
+				if (data.UniqueMembersOnly)
 					collection = await storage.UniqueMembersTimeSpan(locations, startDate, endDate, token);
 
 				else

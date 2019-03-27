@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Microcharts;
 using SkiaSharp;
 using TargetAudienceClient.Constants;
+using TargetAudienceClient.Services;
 using Xamarin.Forms;
 
 namespace TargetAudienceClient.ViewModels
@@ -14,6 +15,7 @@ namespace TargetAudienceClient.ViewModels
 	{
 		public event PropertyChangedEventHandler PropertyChanged;
 		INavigation navigation;
+		IHistoryService historyService;
 
 		// TODO
 		// Location multiselect
@@ -31,10 +33,11 @@ namespace TargetAudienceClient.ViewModels
 
 		public Chart AgeChart { get; private set; }
 
-
 		public HistoryViewModel(INavigation navigation)
 		{
 			this.navigation = navigation;
+			historyService = ServiceContainer.Resolve<IHistoryService>();
+			historyService.Updated += HistoryService_Updated;
 
 			GenderChart = new PieChart()
 			{
@@ -90,6 +93,13 @@ namespace TargetAudienceClient.ViewModels
 					 }}
 			};
 		}
+
+		void HistoryService_Updated(object sender, HistoryUpdatedEventArgs e)
+		{
+			// TODO Update and parse audience data 
+			throw new Exception("This works but needs implementing");
+		}
+
 
 		Chart CreateChart()
 		{

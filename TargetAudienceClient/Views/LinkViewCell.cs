@@ -1,4 +1,5 @@
 ﻿using System;
+using TargetAudienceClient.Utils;
 using Xamarin.Forms;
 
 namespace TargetAudienceClient.Views
@@ -8,18 +9,7 @@ namespace TargetAudienceClient.Views
 	{
 		public LinkViewCell(string label)
 		{
-			Thickness padding;
-			switch (Device.RuntimePlatform)
-			{
-				case Device.iOS:
-					padding = new Thickness(20, 15);
-					break;
-				case Device.Android:
-				case Device.UWP:
-				default:
-					padding = new Thickness(0);
-					break;
-			}
+			var padding = CellPadding.Default;
 
 			var layout = new StackLayout
 			{

@@ -33,12 +33,24 @@ namespace TargetAudienceClient.Pages
 			{
 				HasUnevenRows = true,
 				Root = new TableRoot {
-					new TableSection("Audience Makeup"){
+					// TODO move to filter screen later
+					new TableSection("Filter")
+					{
+						new TextCell()
+						{
+							Text = "Summary to go here",
+							IsEnabled = false
+						}
+					},
+
+					new TableSection("Audience Makeup")
+					{
 						new CustomViewCell(genderChartView) { IsEnabled = false },
 						new LinkViewCell("Male Audience") { StyleId = DisclosureTypes.Disclosure },
 						new LinkViewCell("Female Audience") { StyleId = DisclosureTypes.Disclosure }
 					},
-					new TableSection("Ages"){
+					new TableSection("Ages")
+					{
 						new CustomViewCell(agesChartView) { IsEnabled = false }
 					},
 					//new TableSection("Test"){
@@ -55,7 +67,7 @@ namespace TargetAudienceClient.Pages
 
 		private void OpenSettings()
 		{
-			throw new NotImplementedException();
+			Navigation.PushAsync(new HistoryFilterPage());
 		}
 
 		public void DidAppear()

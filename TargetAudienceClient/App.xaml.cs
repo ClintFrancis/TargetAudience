@@ -4,6 +4,8 @@ using Xamarin.Forms.Xaml;
 using TargetAudienceClient.Pages;
 using TargetAudienceClient.Forms.Models;
 using MonkeyCache.FileStore;
+using TargetAudienceClient.Models;
+using TargetAudienceClient.Services;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace TargetAudienceClient
@@ -20,8 +22,7 @@ namespace TargetAudienceClient
 
 			Barrel.ApplicationId = "TargetAudience";
 
-			//ServiceContainer.Register<ICreateOrderModel>(new CreateOrderModel());
-			//ServiceContainer.Register<ICaptureDetailsViewModel>(new CaptureViewModel());
+			ServiceContainer.Register<IHistoryService>(new HistoryService());
 
 			MainPage = new MainPage();
 		}

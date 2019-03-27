@@ -98,6 +98,32 @@
     <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\TargetAudience.Functions.dll" />
     <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\TargetAudience.Functions.pdb" />
     <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\extensions.json" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\local.settings.json" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\CaptureAudience\function.json" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\SocialTrendsByLocation\function.json" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\CoreCompat.System.Drawing.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Azure.DocumentDB.Core.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Azure.Documents.ServiceInterop.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Extensions.Primitives.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Net.Http.Headers.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Rest.ClientRuntime.Azure.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.Rest.ClientRuntime.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Microsoft.WindowsAzure.Storage.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\MoreLinq.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\NCrontab.Signed.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Newtonsoft.Json.Bson.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\Newtonsoft.Json.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\System.Diagnostics.DiagnosticSource.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\System.Memory.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\System.Net.Http.Formatting.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\System.Runtime.CompilerServices.Unsafe.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\System.Text.Encodings.Web.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\System.Threading.Tasks.Extensions.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\TargetAudience.Common.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\TargetAudience.Common.pdb" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\runtimes\unix\lib\netstandard1.3\System.Text.Encoding.CodePages.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\runtimes\win\lib\netstandard1.3\System.Text.Encoding.CodePages.dll" />
+    <None Remove="obj\Release\netcoreapp2.0\PubTmp\Out\bin\runtimes\win7-x64\native\Microsoft.Azure.Documents.ServiceInterop.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TargetAudience.Common\TargetAudience.Common.csproj" />
