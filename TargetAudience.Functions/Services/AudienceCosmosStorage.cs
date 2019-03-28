@@ -232,12 +232,9 @@ namespace TargetAudience.Functions.Services
 		/// <param name="startDate">From date.</param>
 		/// <param name="endDate">To date.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public async Task<List<Member>> QueryTimeSpan(string[] locations, DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1)
+		public async Task<List<Member>> QueryTimeSpan(DateTime startDate, DateTime endDate, string[] locations, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			await CheckInitialized();
-
-			if (locations == null)
-				throw new ArgumentNullException(nameof(locations));
 
 			var diff = endDate.Subtract(startDate);
 			if (diff < TimeSpan.Zero)
@@ -248,10 +245,21 @@ namespace TargetAudience.Functions.Services
 			try
 			{
 				FeedOptions queryOptions = (maxItemCount > 0) ? new FeedOptions { MaxItemCount = maxItemCount } : null;
-				results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink, queryOptions)
-					.Where(x => locations.Contains(x.Location))
-					.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
-					.ToList();
+
+				if (locations == null)
+				{
+					results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink, queryOptions)
+						.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
+						.ToList();
+				}
+
+				else
+				{
+					results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink, queryOptions)
+						.Where(x => locations.Contains(x.Location))
+						.Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
+						.ToList();
+				}
 			}
 			catch (DocumentClientException de)
 			{
@@ -363,7 +371,7 @@ namespace TargetAudience.Functions.Services
 			return orderedResults;
 		}
 
-		public async Task<List<Member>> UniqueMembersTimeSpan(string[] locations, DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1)
+		public async Task<List<Member>> UniqueMembersTimeSpan(DateTime startDate, DateTime endDate, string[] locations, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			await CheckInitialized();
 
@@ -377,7 +385,6 @@ namespace TargetAudience.Functions.Services
 			var results = new List<Member>();
 			try
 			{
-				//MemberComparer comparer = new MemberComparer();
 				FeedOptions queryOptions = (maxItemCount > 0) ? new FeedOptions { MaxItemCount = maxItemCount } : null;
 				results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink, queryOptions)
 					.Where(x => locations.Contains(x.Location))
@@ -401,19 +408,32 @@ namespace TargetAudience.Functions.Services
 			return results;
 		}
 
-		//internal class MemberComparer : EqualityComparer<Member>
-		//{
-		//	public override bool Equals(Member x, Member y)
-		//	{
-		//		return x.PersistedFaceId == y.PersistedFaceId;
-		//	}
+		public async Task<string[]> GetLocations()
+		{
+			await CheckInitialized();
 
-		//	public override int GetHashCode(Member obj)
-		//	{
-		//		return obj == null ? 0 :
-		//		(string.IsNullOrEmpty(obj.PersistedFaceId)) ? obj.Id.GetHashCode() : obj.PersistedFaceId.GetHashCode();
-		//	}
-		//}
+			string[] results;
+			try
+			{
+				results = Client.CreateDocumentQuery<Member>(audienceCollection.SelfLink)
+					.Select(x => x.Location)
+					.Distinct()
+					.ToArray();
+			}
+			catch (DocumentClientException de)
+			{
+				Console.WriteLine(de.Message);
+				throw de;
+
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				throw ex;
+			}
+
+			return results;
+		}
 
 	}
 }

@@ -66,7 +66,7 @@ namespace TargetAudienceClient.Services
 
 		public bool IsBusy { get; private set; }
 
-		public bool IsDirty { get; private set; }
+		public bool IsDirty { get; private set; } = true;
 		#endregion
 
 		public HistoryService()
@@ -88,6 +88,7 @@ namespace TargetAudienceClient.Services
 				return null;
 			}
 
+			Data = response.Audience;
 			IsBusy = IsDirty = false;
 			Updated?.Invoke(this, new HistoryUpdatedEventArgs(Data));
 

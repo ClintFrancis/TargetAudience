@@ -20,6 +20,9 @@ namespace TargetAudienceClient.Pages
 				new ToolbarItem("Settings", null, () => OpenSettings()) { Icon = "folder.png" } // TODO Change icon to show settings / config
 			);
 
+			var filterSummary = new TextCell() { IsEnabled = false };
+			filterSummary.SetBinding(TextCell.TextProperty, new Binding("FilterSummary"));
+
 			var genderChartView = new ChartView();
 			genderChartView.BackgroundColor = Color.Transparent;
 			genderChartView.HeightRequest = 200;
@@ -33,14 +36,9 @@ namespace TargetAudienceClient.Pages
 			{
 				HasUnevenRows = true,
 				Root = new TableRoot {
-					// TODO move to filter screen later
 					new TableSection("Filter")
 					{
-						new TextCell()
-						{
-							Text = "Summary to go here",
-							IsEnabled = false
-						}
+						filterSummary
 					},
 
 					new TableSection("Audience Makeup")
@@ -49,17 +47,11 @@ namespace TargetAudienceClient.Pages
 						new LinkViewCell("Male Audience") { StyleId = DisclosureTypes.Disclosure },
 						new LinkViewCell("Female Audience") { StyleId = DisclosureTypes.Disclosure }
 					},
+
 					new TableSection("Ages")
 					{
 						new CustomViewCell(agesChartView) { IsEnabled = false }
-					},
-					//new TableSection("Test"){
-					//	new EntryCell { Label = "\U0001F600", Placeholder = "", IsEnabled = false },
-					//	new EntryCell { Label = "ABV", Placeholder = "", IsEnabled = false },
-					//	new EntryCell { Label = "Amsterdam", Placeholder = "", IsEnabled = false },
-					//	new EntryCell { Label = "Location", Placeholder = "", IsEnabled = false },
-					//	new LinkViewCell("test") { StyleId = DisclosureTypes.Disclosure }
-					//}
+					}
 				},
 				Intent = TableIntent.Settings
 			};
@@ -78,6 +70,13 @@ namespace TargetAudienceClient.Pages
 		public void DidDisappear()
 		{
 			//throw new NotImplementedException();
+		}
+
+		protected override void OnAppearing()
+		{
+			var viewModel = (HistoryViewModel)BindingContext;
+			if (viewModel.RefreshCommand.CanExecute(null))
+				viewModel.RefreshCommand.Execute(null);
 		}
 	}
 }

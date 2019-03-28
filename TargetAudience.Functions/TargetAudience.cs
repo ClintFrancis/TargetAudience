@@ -119,16 +119,35 @@ namespace TargetAudience.Functions
 				var endDate = (data.EndDate != default(DateTime)) ? data.EndDate : DateTime.Now;
 				var startDate = (data.StartDate != default(DateTime)) ? data.StartDate : endDate.Subtract(TimeSpan.FromMinutes(data.Minutes));
 				var token = new System.Threading.CancellationToken();
-				var locations = (data.Locations?.Length > 0) ? data.Locations : new string[] { DefaultLocationId };
+				var locations = data.Locations;
 
 				List<Member> collection;
 				if (data.UniqueMembersOnly)
-					collection = await storage.UniqueMembersTimeSpan(locations, startDate, endDate, token);
+					collection = await storage.UniqueMembersTimeSpan(startDate, endDate, locations, token);
 
 				else
-					collection = await storage.QueryTimeSpan(locations, startDate, endDate, token);
+					collection = await storage.QueryTimeSpan(startDate, endDate, locations, token);
 
 				response.Audience = MemberUtils.CreateAudience(collection);
+				response.StatusCode = (int)HttpStatusCode.OK;
+
+				return new OkObjectResult(response);
+			}
+			catch (Exception ex)
+			{
+				response.Message = ex.Message;
+				response.StatusCode = (int)HttpStatusCode.InternalServerError;
+				return new BadRequestObjectResult(response);
+			}
+		}
+
+		[FunctionName("GetLocations")]
+		public static async Task<IActionResult> GetLocations([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, ILogger log)
+		{
+			var response = new LocationResponse();
+			try
+			{
+				response.Locations = await storage.GetLocations();
 				response.StatusCode = (int)HttpStatusCode.OK;
 
 				return new OkObjectResult(response);

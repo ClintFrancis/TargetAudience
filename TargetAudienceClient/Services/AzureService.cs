@@ -68,11 +68,28 @@ namespace TargetAudienceClient.Services
 				var json = JsonConvert.SerializeObject(post);
 				var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-				return await MakeRequest<AudienceResponse>(ProjectConfig.CaptureAudienceUrl, httpContent);
+				return await MakeRequest<AudienceResponse>(ProjectConfig.AudienceHistoryUrl, httpContent);
 			}
 			catch (Exception ex)
 			{
 				return new AudienceResponse()
+				{
+					Message = ex.Message,
+					ErrorCode = 1
+				};
+			}
+		}
+
+		public static async Task<LocationResponse> GetLocations()
+		{
+			try
+			{
+				var httpContent = new StringContent("");
+				return await MakeRequest<LocationResponse>(ProjectConfig.GetLocationsUrl, httpContent);
+			}
+			catch (Exception ex)
+			{
+				return new LocationResponse()
 				{
 					Message = ex.Message,
 					ErrorCode = 1

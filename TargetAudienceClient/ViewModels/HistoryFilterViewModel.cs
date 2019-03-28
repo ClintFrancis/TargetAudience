@@ -122,15 +122,15 @@ namespace TargetAudienceClient.ViewModels
 		{
 			historyService = ServiceContainer.Resolve<IHistoryService>();
 			mainStartDate = historyService.StartDate;
-			mainEndDate = historyService.EndDate;
+			mainEndDate = historyService.EndDate = DateTime.Now;
 			UniqueMembersOnly = historyService.UniqueMembersOnly;
 		}
 
 		void VerifyTimes()
 		{
-			if (mainEndDate > DateTime.Now.Subtract(TimeSpan.FromMinutes(1)))
+			if (mainEndDate > DateTime.Now.Subtract(TimeSpan.FromSeconds(10)))
 			{
-				mainEndDate = mainEndDate.Subtract(TimeSpan.FromMinutes(1));
+				mainEndDate = mainEndDate.Subtract(TimeSpan.FromSeconds(10));
 				OnPropertyChanged("EndDate");
 				OnPropertyChanged("EndTime");
 			}

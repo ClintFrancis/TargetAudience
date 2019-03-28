@@ -46,7 +46,7 @@ namespace TargetAudienceClient.ViewModels
 			var location = Settings.CameraLocation;
 
 			var result = new UIResponse();
-			AudienceResponse response = await AzureService.IdentifyAudience(location, imageData);
+			AudienceResponse response = await AzureService.CaptureAudience(location, imageData);
 			if (!response.HasError)
 			{
 				//Saves to the cache with a timespan for expiration

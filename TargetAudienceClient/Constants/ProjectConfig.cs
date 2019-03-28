@@ -11,5 +11,7 @@ namespace TargetAudienceClient
 		public static string IdentifyAudienceUrl = BaseUrl + "IdentifyAudience?code=82DakhZ9MFeOQpoePlBOEvNNAwApH2SjtXdf6UC5KI4kH/Y7TXGzQw==";
 		public static string AudienceHistoryUrl = BaseUrl + "AudienceHistory?code=QLRWyaNg4MqpCLBXNPVRWCOODqk7mqMz1L5/xX32pXHIBZykHYWIRQ==";
 		public static string SocialTrendsByLocationUrl = BaseUrl + "SocialTrendsByLocation?code=2VvmuHhCbxQOVh4AJsLBLzUdfxrYJlGSn7sbLGhZYrqKlZ6NKR6x7g==";
+		public static string GetLocationsUrl = BaseUrl + "GetLocations?code=3Y5rLKqYcmeVFIm2qGXnxNpLNzQyTRoIRts6MDLaXUZtCwlHVjApqQ==";
+
 	}
 }

@@ -11,6 +11,10 @@ namespace TargetAudienceClient
 		CameraPreview cameraPreview;
 		ActivityIndicator activityIndicator;
 		CaptureViewModel captureModel;
+		Label cameraMissingLabel;
+		string messageCameraNotSupported = "Camera Not Available";
+		string messageUploading = "Uploading";
+
 
 		public CapturePage()
 		{
@@ -73,9 +77,9 @@ namespace TargetAudienceClient
 
 			else
 			{
-				var label = new Label()
+				cameraMissingLabel = new Label()
 				{
-					Text = "Camera Not Available",
+					Text = messageCameraNotSupported,
 					HorizontalOptions = LayoutOptions.CenterAndExpand
 				};
 
@@ -85,7 +89,7 @@ namespace TargetAudienceClient
 				var centerLayout = new StackLayout();
 				centerLayout.HorizontalOptions = LayoutOptions.CenterAndExpand;
 				centerLayout.VerticalOptions = LayoutOptions.CenterAndExpand;
-				centerLayout.Children.Add(label);
+				centerLayout.Children.Add(cameraMissingLabel);
 				centerLayout.Children.Add(activityIndicator);
 
 				Content = centerLayout;
@@ -150,7 +154,10 @@ namespace TargetAudienceClient
 			}
 
 			ShowActivityIndicator(true);
+			cameraMissingLabel.Text = messageUploading;
 			var response = await captureModel.Submit(imageBytes);
+			cameraMissingLabel.Text = messageCameraNotSupported;
+
 			ShowActivityIndicator(false);
 
 			if (response.Result)

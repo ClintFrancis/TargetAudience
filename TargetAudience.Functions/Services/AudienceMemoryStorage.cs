@@ -113,7 +113,7 @@ namespace TargetAudience.Functions.Services
 		/// <param name="startDate">From date.</param>
 		/// <param name="endDate">To date.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		public Task<List<Member>> QueryTimeSpan(string[] locations, DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1)
+		public Task<List<Member>> QueryTimeSpan(DateTime startDate, DateTime endDate, string[] locations, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
@@ -199,7 +199,7 @@ namespace TargetAudience.Functions.Services
 			return Task.FromResult<List<LocationWindow>>(orderedResults);
 		}
 
-		public Task<List<Member>> UniqueMembersTimeSpan(string[] locations, DateTime startDate, DateTime endDate, CancellationToken cancellationToken, int maxItemCount = -1)
+		public Task<List<Member>> UniqueMembersTimeSpan(DateTime startDate, DateTime endDate, string[] locations, CancellationToken cancellationToken, int maxItemCount = -1)
 		{
 			if (locations == null)
 				throw new ArgumentNullException(nameof(locations));
@@ -221,6 +221,21 @@ namespace TargetAudience.Functions.Services
 			}
 
 			return Task.FromResult<List<Member>>(results);
+		}
+
+		public Task<string[]> GetLocations()
+		{
+			string[] results;
+
+			lock (_syncroot)
+			{
+				results = memoryList
+					.Select(x => x.Location)
+					.Distinct()
+					.ToArray();
+			}
+
+			return Task.FromResult<string[]>(results);
 		}
 	}
 }
