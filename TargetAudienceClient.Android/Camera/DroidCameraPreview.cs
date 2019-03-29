@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Android;
+using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.Graphics;
 using Android.Hardware.Camera2;
 using Android.Hardware.Camera2.Params;
 using Android.Media;
 using Android.OS;
 using Android.Runtime;
+using Android.Support.V4.Content;
 using Android.Util;
 using Android.Views;
 using Camera2Basic;
@@ -370,6 +374,12 @@ namespace TargetAudienceClient.Droid
 		// Opens the camera specified by {@link Camera2BasicFragment#mCameraId}.
 		public void OpenCamera(int width, int height)
 		{
+			//if (ContextCompat.CheckSelfPermission(Application.Context, Manifest.Permission.Camera) == Permission.Denied)
+			//{
+			//	//throw new System.Exception("NOPE");
+			//	return;
+			//}
+
 			SetUpCameraOutputs(width, height);
 			ConfigureTransform(width, height);
 
@@ -578,6 +588,8 @@ namespace TargetAudienceClient.Droid
 		{
 			try
 			{
+				// TODO Check if we have permission!!!
+
 				// This is how to tell the camera to lock focus.
 				PreviewRequestBuilder.Set(CaptureRequest.ControlAfTrigger, (int)ControlAFTrigger.Start);
 				// Tell #mCaptureCallback to wait for the lock.

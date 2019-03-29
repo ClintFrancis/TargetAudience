@@ -1,6 +1,8 @@
 ﻿using Plugin.Media;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 using System;
-
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace TargetAudienceClient.Pages
@@ -11,8 +13,32 @@ namespace TargetAudienceClient.Pages
 
 		public MainPage()
 		{
-			CrossMedia.Current.Initialize();
+			CheckPermissions();
+		}
 
+		async Task CheckPermissions()
+		{
+			var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Camera);
+			if (status != PermissionStatus.Granted)
+			{
+				Application.Current.ModalPopping += HandleModalPopping;
+				await Navigation.PushModalAsync(new PermissionsPage(), false);
+			}
+
+			else
+			{
+				CreateContent();
+			}
+		}
+
+		private void HandleModalPopping(object sender, ModalPoppingEventArgs e)
+		{
+			Application.Current.ModalPopping -= HandleModalPopping;
+			CreateContent();
+		}
+
+		void CreateContent()
+		{
 			var textColor = Color.White;
 			var backgroundColor = Color.FromRgb(73, 113, 175);
 
@@ -48,6 +74,7 @@ namespace TargetAudienceClient.Pages
 			settingsNavigationPage.BarBackgroundColor = backgroundColor;
 			Children.Add(settingsNavigationPage);
 		}
+
 
 		protected override void OnCurrentPageChanged()
 		{

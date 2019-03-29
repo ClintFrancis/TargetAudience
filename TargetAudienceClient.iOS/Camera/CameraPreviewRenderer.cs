@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using TargetAudienceClient;
+using TargetAudienceClient.Constants;
 using TargetAudienceClient.iOS;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
@@ -50,7 +51,7 @@ namespace TargetAudienceClient.iOS
 		{
 			base.OnElementPropertyChanged(sender, e);
 
-			if (e.PropertyName == "Camera")
+			if (e.PropertyName == PropertyIds.CameraOption)
 			{
 				var view = (CameraPreview)sender;
 				uiCameraPreview.UpdateCameraOption(view.CameraOption);

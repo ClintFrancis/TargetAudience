@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Plugin.Media;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 using TargetAudienceClient.ViewModels;
 using Xamarin.Forms;
 
@@ -14,7 +17,6 @@ namespace TargetAudienceClient
 		Label cameraMissingLabel;
 		string messageCameraNotSupported = "Camera Not Available";
 		string messageUploading = "Uploading";
-
 
 		public CapturePage()
 		{
@@ -106,6 +108,8 @@ namespace TargetAudienceClient
 				{
 					cameraPreview.Opacity = value ? .6 : 1;
 				}
+
+				if (cameraMissingLabel != null) cameraMissingLabel.Text = value ? messageUploading : messageCameraNotSupported;
 			});
 		}
 
@@ -154,10 +158,7 @@ namespace TargetAudienceClient
 			}
 
 			ShowActivityIndicator(true);
-			cameraMissingLabel.Text = messageUploading;
 			var response = await captureModel.Submit(imageBytes);
-			cameraMissingLabel.Text = messageCameraNotSupported;
-
 			ShowActivityIndicator(false);
 
 			if (response.Result)
@@ -195,13 +196,13 @@ namespace TargetAudienceClient
 
 		void StopCamera()
 		{
-			if (cameraPreview != null && cameraPreview.StopCamera != null)
+			if (CrossMedia.Current.IsCameraAvailable && cameraPreview != null && cameraPreview.StopCamera != null)
 				cameraPreview.StopCamera.Execute(null);
 		}
 
 		void StartCamera()
 		{
-			if (cameraPreview != null && cameraPreview.StartCamera != null)
+			if (CrossMedia.Current.IsCameraAvailable && cameraPreview != null && cameraPreview.StartCamera != null)
 			{
 				cameraPreview.CameraOption = Settings.CameraOption;
 				cameraPreview.StartCamera.Execute(null);

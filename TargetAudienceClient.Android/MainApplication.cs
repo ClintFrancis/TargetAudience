@@ -20,7 +20,7 @@ namespace TargetAudienceClient.Droid
 		{
 			base.OnCreate();
 			RegisterActivityLifecycleCallbacks(this);
-			//A great place to initialize Xamarin.Insights and Dependency Services!
+			CrossCurrentActivity.Current.Init(this);
 		}
 
 		public override void OnTerminate()

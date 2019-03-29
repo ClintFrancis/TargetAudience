@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
+using Lottie.Forms;
 using Plugin.Media;
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
@@ -65,8 +66,13 @@ namespace TargetAudienceClient.Pages
 					HorizontalOptions = LayoutOptions.CenterAndExpand,
 					VerticalOptions = LayoutOptions.CenterAndExpand
 				};
+
+				var animationView = new AnimationView();
+				animationView.Animation = "LoadingAnimation.json";
+
 				var layout = new StackLayout();
 				layout.Children.Add(label);
+				layout.Children.Add(animationView);
 				Content = layout;
 			}
 		}

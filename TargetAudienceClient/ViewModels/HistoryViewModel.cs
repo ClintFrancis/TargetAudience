@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -59,12 +60,12 @@ namespace TargetAudienceClient.ViewModels
 				Margin = 60
 			};
 
-			AgeChart = new LineChart()
+			AgeChart = new PointChart()
 			{
 				BackgroundColor = SKColor.Empty,
-				LineAreaAlpha = 0x0,
 				PointSize = 20,
-				LineMode = LineMode.Straight
+				LabelTextSize = 30
+
 			};
 		}
 
@@ -81,6 +82,7 @@ namespace TargetAudienceClient.ViewModels
 		void HistoryService_Updated(object sender, HistoryUpdatedEventArgs e)
 		{
 			CreateGenderChart();
+			CreateAgeChart();
 		}
 
 		void CreateGenderChart()
@@ -103,7 +105,7 @@ namespace TargetAudienceClient.ViewModels
 				{
 					Label = "Male",
 					ValueLabel = data.Males.Total.ToString(),
-					Color = CustomColors.DarkBlue
+					Color = CustomColors.SKDarkBlue
 				});
 			}
 
@@ -114,83 +116,42 @@ namespace TargetAudienceClient.ViewModels
 				{
 					Label = "Female",
 					ValueLabel = data.Females.Total.ToString(),
-					Color = CustomColors.LightBlue
+					Color = CustomColors.SKLightBlue
 				});
 			}
 
 			GenderChart.Entries = entries;
 		}
 
-		void CreateDummyCharts()
+		void CreateAgeChart()
 		{
-			GenderChart = new PieChart()
+			var data = historyService.Data;
+			if (data == null || data.Total == 0)
 			{
-				HoleRadius = .7f,
-				LabelTextSize = 40,
-				Margin = 60
-			};
-			GenderChart.Entries = new ChartEntry[]
+				AgeChart.Entries = new ChartEntry[1]
 				{
-					new ChartEntry(.7f)
-					{
-						 Label = "Male",
-						 ValueLabel = "7",
-						 Color = CustomColors.DarkBlue
-					},
-					new ChartEntry(.3f)
-					{
-						 Label = "Female",
-						 ValueLabel = "3",
-						 Color = CustomColors.LightBlue
-					},
+					new ChartEntry(1) { Color = SKColors.LightGray }
 				};
+				return;
+			}
 
-			AgeChart = new LineChart()
+			var entries = new List<ChartEntry>();
+			foreach (var group in data.GetAllIndividuals().GroupBy(x => x.Age).OrderBy(c => c.Key))
 			{
-				BackgroundColor = SKColor.Empty,
-				LineAreaAlpha = 0x0,
-				PointSize = 20,
-				LineMode = LineMode.Straight,
-				Entries = new ChartEntry[]
-				{
-					new ChartEntry(212)
-					{
-						 Label = "UWP",
-						 ValueLabel = "212",
-						 Color = CustomColors.DarkBlue
-					},
-					new ChartEntry(248)
-					{
-						 Label = "Android",
-						 ValueLabel = "248",
-						 Color = CustomColors.DarkBlue
-						 },
-					 new ChartEntry(128)
-					 {
-						 Label = "iOS",
-						 ValueLabel = "128",
-						 Color = CustomColors.DarkBlue
-					 },
-					 new ChartEntry(500)
-					 {
-					 Color = CustomColors.DarkBlue
-					 }}
-			};
-		}
+				var age = group.Key;
+				var total = group.Count();
+				entries.Add(
+						new ChartEntry(total)
+						{
+							Label = age.ToString(),
+							ValueLabel = total.ToString(),
+							Color = CustomColors.SKDarkBlue,
+							TextColor = SKColors.LightGray
+						}
+					);
+			}
 
-
-		Chart CreateChart()
-		{
-			var genderChart = new LineChart()
-			{
-				LabelTextSize = 24,
-				BackgroundColor = SKColor.Empty,
-				LineMode = LineMode.Straight,
-				PointMode = PointMode.Circle,
-				PointSize = 20,
-				LineAreaAlpha = 0x0
-			};
-			return genderChart;
+			AgeChart.Entries = entries;
 		}
 
 		bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)

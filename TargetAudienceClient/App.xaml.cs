@@ -6,6 +6,9 @@ using TargetAudienceClient.Forms.Models;
 using MonkeyCache.FileStore;
 using TargetAudienceClient.Models;
 using TargetAudienceClient.Services;
+using System.Threading.Tasks;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace TargetAudienceClient
@@ -26,6 +29,8 @@ namespace TargetAudienceClient
 
 			MainPage = new MainPage();
 		}
+
+
 
 		protected override void OnStart()
 		{

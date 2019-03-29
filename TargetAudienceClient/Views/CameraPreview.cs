@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using TargetAudienceClient.Constants;
 using Xamarin.Forms;
 
 namespace TargetAudienceClient
@@ -10,7 +11,7 @@ namespace TargetAudienceClient
 		public event EventHandler<EventArgs> CameraReady;
 
 		public static readonly BindableProperty CameraProperty = BindableProperty.Create(
-			propertyName: "CameraOption",
+			propertyName: PropertyIds.CameraOption,
 			returnType: typeof(CameraOptions),
 			declaringType: typeof(CameraPreview),
 			defaultValue: CameraOptions.Rear,
